@@ -1,0 +1,607 @@
+---
+title: "Análise e Previsão de Séries Temporais"
+subtitle: "Comércio Varejista e Taxa de Desemprego"
+author: "Eduarda Da Silva Brito"
+institute: "ANÁLISE DE SÉRIES TEMPORAIS<br>Professor: Pedro M. Almeida"
+format:
+  revealjs:
+    theme: simple
+    css: styles.css
+    slide-number: true
+    transition: fade
+    background-transition: fade
+    incremental: true
+    code-fold: true
+    code-line-numbers: false
+    toc: false
+editor: visual
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## Introdução
+
+As séries temporais permitem analisar a evolução de fenômenos ao longo do tempo, identificar padrões de comportamento e realizar previsões para períodos futuros.
+
+::: caixa
+### Séries analisadas
+
+-   🛒 Índice de Volume de Vendas do Comércio Varejista
+-   📉 Taxa de Desemprego
+:::
+
+::: caixa
+## Aspectos investigados
+
+-   Tendência
+
+-   Sazonalidade
+
+-   Modelagem por Suavização Exponencial (ETS)
+
+-   Previsão para os 12 meses subsequentes
+:::
+
+## Objetivo
+
+::: caixa-azul
+Analisar o comportamento temporal das séries, identificar seus principais padrões e selecionar modelos de suavização exponencial (ETS) para a realização de previsões de curto prazo.
+:::
+
+## Metodologia
+
+::: caixa
+A análise foi desenvolvida em etapas, desde o tratamento das bases de dados até a obtenção das previsões.
+:::
+
+1.  Tratamento e limpeza dos dados
+2.  Análise exploratória
+3.  Identificação de tendência e sazonalidade
+4.  Identificação de outliers via STL
+5.  Modelagem por suavização exponencial ETS
+6.  Comparação dos modelos
+7.  Previsão para os 12 meses subsequentes
+8.  Diagnóstico dos resíduos
+
+## Série 1: Comércio Varejista
+
+```{=html}
+<div class="metricas"> <div class="metrica"> <div class="valor">315</div> <div class="rotulo">observações mensais</div> </div>
+
+<div class="metrica"> <div class="valor">2000–2026</div> <div class="rotulo">período analisado</div> </div>
+
+<div class="metrica"> <div class="valor">SIDRA/IBGE</div> <div class="rotulo">fonte dos dados</div> </div> </div>
+```
+
+::: caixa
+> A série representa o Índice de Volume de Vendas do Comércio Varejista, com frequência mensal e base de referência 2022 = 100, sendo utilizada para analisar a evolução da atividade comercial ao longo do tempo.
+:::
+
+## Estatísticas Descritivas – Comércio Varejista
+
+------------------------------------------------------------------------
+
+| **Estatística** | **Valor** |
+|:----------------|----------:|
+| Mínimo          |     43,32 |
+| 1º Quartil      |     60,04 |
+| Mediana         |     88,92 |
+| Média           |     81,78 |
+| 3º Quartil      |     97,52 |
+| Máximo          |    131,81 |
+| Desvio-padrão   |     22,29 |
+| Variância       |    496,85 |
+
+## Principais Observações
+
+::: caixa
+-   O índice apresentou média de **81,78** pontos e mediana de **88,92** pontos;
+-   Os valores variaram entre **43,32** e **131,81** pontos, evidenciando ampla variação ao longo do período analisado;
+-   O desvio-padrão de **22,29** pontos indica variabilidade moderada da série.
+-   A mediana superior à média sugere leve assimetria na distribuição dos valores.
+-   Os quartis indicam que **50% das observações concentraram-se entre 60,04 e 97,52 pontos**.
+:::
+
+------------------------------------------------------------------------
+
+## Evolução Temporal do Comércio Varejista
+
+![](series_1.png)
+
+## Principais Observações
+
+::: caixa
+-   A série apresenta tendência de crescimento ao longo do período analisado;
+-   Observa-se forte sazonalidade, com picos recorrentes no mês de dezembro;
+-   Entre 2015 e 2016 verifica-se uma redução temporária do índice, seguida de recuperação gradual;
+-   A partir de 2020, observa-se retomada do crescimento, mantendo o padrão sazonal característico da série.
+:::
+
+------------------------------------------------------------------------
+
+## Sazonalidade do Comércio Varejista
+
+![](comercio2.png){width="90%"}
+
+------------------------------------------------------------------------
+
+## Principais Observações
+
+::: caixa
+-   A série apresenta um padrão sazonal bem definido, com comportamento semelhante entre os anos;
+-   Os menores índices concentram-se, em geral, nos primeiros meses do ano;
+-   Os maiores valores são observados sistematicamente no mês de dezembro;
+-   O comportamento sazonal está associado ao aumento da atividade comercial no período de compras de final de ano.
+:::
+
+------------------------------------------------------------------------
+
+## Decomposição Multiplicativa da Série
+
+![](comercio3.png){width="90%"}
+
+------------------------------------------------------------------------
+
+## Principais Observações da Decomposição
+
+::: caixa
+### Componentes da Série
+
+-   A componente de tendência apresenta crescimento ao longo da maior parte da série;
+
+-   Entre **2015 e 2017**, observa-se uma redução temporária, seguida de recuperação gradual;
+
+-   A componente sazonal permanece estável, confirmando um padrão de repetição anual.
+
+-   Os resíduos permanecem próximos de **1** durante grande parte do período, indicando que a decomposição representa adequadamente a estrutura da série.
+:::
+
+------------------------------------------------------------------------
+
+## Função de Autocorrelação (ACF)
+
+![](comercio4.0.png){width="90%"}
+
+------------------------------------------------------------------------
+
+## Principais Observações da ACF
+
+::: caixa
+-   As autocorrelações permanecem positivas e elevadas ao longo das defasagens;
+-   O decaimento lento das autocorrelações indica a presença de tendência na série;
+-   Observa-se um pico na defasagem de **12 meses**, evidenciando sazonalidade anual;
+-   As autocorrelações significativas confirmam forte dependência temporal entre as observações.
+:::
+
+------------------------------------------------------------------------
+
+## Identificação de Outliers via STL
+
+![](comercio5.png){width="90%"}
+
+------------------------------------------------------------------------
+
+## Principais Observações dos Outliers
+
+::: caixa
+-   A decomposição STL permitiu identificar observações atípicas na série;
+-   A maior parte dos resíduos permaneceu próxima do comportamento esperado, indicando estabilidade da série;
+-   Os valores atípicos representam desvios pontuais em relação ao padrão temporal da série;
+-   Foram detectados **25 resíduos extremos** pelo critério de **3 × IQR**.
+:::
+
+------------------------------------------------------------------------
+
+## Validação dos modelos ETS
+
+::: caixa
+#### Estratégia de Validação
+
+-   As séries foram divididas em **conjunto de treinamento** e **conjunto de teste;**
+
+-   Os **12 meses mais recentes** foram reservados para validação;
+
+-   Foram ajustados cinco modelos de suavização exponencial (ETS);
+
+-   As previsões foram comparadas com os valores observados no conjunto de teste;
+
+-   O modelo de melhor desempenho foi selecionado com base no **menor valor do MAPE.**
+:::
+
+## Comparação dos Modelos ETS
+
+| **Modelo**                            |  **RMSE** |   **MAE** | **MAPE (%)** |
+|:--------------------------------------|----------:|----------:|-------------:|
+| SES                                   |     8,041 |     5,100 |        4,468 |
+| Holt                                  |     7,679 |     5,369 |        4,845 |
+| Holt amortecido                       |     7,679 |     5,369 |        4,845 |
+| Holt-Winters aditivo (AAA)            |     2,873 |     2,569 |        2,366 |
+| **Holt-Winters multiplicativo (MAM)** | **2,068** | **1,516** |    **1,392** |
+
+## Interpretação
+
+::: caixa
+#### Principais Resultados
+
+-   Os modelos **Holt-Winters** apresentaram desempenho superior aos modelos **SES**, **Holt** e **Holt amortecido**.
+
+-   O modelo **Holt-Winters multiplicativo (MAM)** apresentou os menores valores de **RMSE (2,068)**, **MAE (1,516)** e **MAPE (1,392%)**.
+
+-   Como critério de seleção foi adotado o **menor valor de MAPE**, esse modelo foi escolhido para representar a série do comércio varejista.
+:::
+
+------------------------------------------------------------------------
+
+## Validação do Modelo Holt-Winters Multiplicativo
+
+![](validaçao_1.png){width="602"}
+
+## Interpretação da Validação
+
+::: callout-note
+### Principais Observações
+
+-   O modelo reproduziu adequadamente a tendência de crescimento e o padrão sazonal da série.
+-   As previsões acompanharam de forma satisfatória os valores observados no período de teste.
+-   A maior parte dos valores observados permaneceu dentro dos intervalos de previsão.
+-   Esses resultados corroboram as medidas de acurácia obtidas, justificando a escolha do modelo Holt-Winters multiplicativo para a geração das previsões.
+:::
+
+## Previsão para os Próximos 12 Meses
+
+![](comercio6.png){fig-align="center" width="85%"}
+
+------------------------------------------------------------------------
+
+## Principais Resultados da Previsão
+
+::: caixa
+-   O modelo prevê a **manutenção da tendência de crescimento** observada na série;
+
+-   As previsões preservam o **padrão sazonal** característico do comércio varejista;
+
+-   Os maiores valores permanecem concentrados **nos meses finais do ano**, especialmente em dezembro;
+
+-   Os intervalos de previsão tornam-se mais amplos ao longo do horizonte de previsão, refletindo o aumento da incerteza das projeções.
+:::
+
+------------------------------------------------------------------------
+
+## Diagnóstico dos Resíduos
+
+![](comercio7.png){fig-align="center" width="85%"}
+
+------------------------------------------------------------------------
+
+## Principais Resultados dos Resíduos
+
+::: caixa
+-   Os resíduos permanecem centrados em torno de zero ao longo do período analisado;
+
+-   Não foram observados padrões sistemáticos evidentes nos resíduos;
+
+-   A função de autocorrelação (ACF) indica a presença de algumas autocorrelações significativas em determinadas defasagens.
+
+-   O histograma apresenta distribuição aproximadamente simétrica
+:::
+
+## Teste de Ljung-Box
+
+Para complementar a análise gráfica, foi aplicado o **teste de Ljung-Box** aos resíduos, com o objetivo de verificar a existência de autocorrelação residual.
+
+| **Estatística**       | **Valor** |
+|:----------------------|----------:|
+| Estatística (Q\^\*)   |    46,134 |
+| Graus de liberdade    |        24 |
+| Valor-p               |  0,004266 |
+| Defasagens utilizadas |        24 |
+| Modelo df             |         0 |
+
+## Interpretação
+
+::: callout-note
+#### Resultados
+
+-   O valor-p (**0,004266**) é inferior ao nível de significância de **5%**.
+-   Assim, rejeita-se a hipótese de ausência de autocorrelação nos resíduos.
+-   Esse resultado indica que ainda existem dependências temporais não completamente capturadas pelo modelo.
+:::
+
+## Conclusões - Comércio Varejista
+
+::: callout-note
+-   A série apresentou **tendência de crescimento** ao longo do período analisado;
+
+-   Foi identificada **forte sazonalidade anual**, com maiores valores concentrados no final do ano;
+
+-   A decomposição confirmou a presença de componentes de tendência e sazonalidade bem definidos;
+
+-   O modelo **Holt-Winters multiplicativo (ETS(M,A,M))** apresentou o melhor desempenho preditivo, com **MAPE de 1,392%**;
+
+-   As previsões indicam a manutenção da tendência de crescimento e do padrão sazonal da série;
+
+-   O diagnóstico dos resíduos evidenciou **bom ajuste do modelo**, embora ainda existam indícios de autocorrelação residual.
+:::
+
+------------------------------------------------------------------------
+
+## Série 2: Taxa de Desemprego
+
+```{=html}
+<div class="metricas">
+  <div class="metrica">
+    <div class="valor">170</div>
+    <div class="rotulo">observações mensais</div>
+  </div>
+
+  <div class="metrica">
+    <div class="valor">2012-2026</div>
+    <div class="rotulo">período analisado</div>
+  </div>
+
+  <div class="metrica">
+    <div class="valor">IPEADATA/IBGE</div>
+    <div class="rotulo">fonte dos dados</div>
+  </div>
+</div>
+```
+
+::: caixa
+A série representa a Taxa de Desemprego da população brasileira, medida em percentual e obtida a partir da PNAD Contínua, sendo utilizada para analisar a evolução do mercado de trabalho ao longo do período estudado.
+:::
+
+## Estatísticas Descritivas – Taxa de Desemprego
+
+| **Estatística** | **Valor** |
+|:----------------|----------:|
+| Mínimo          |      5,10 |
+| 1º Quartil      |      7,13 |
+| Mediana         |      8,80 |
+| Média           |      9,64 |
+| 3º Quartil      |     12,10 |
+| Máximo          |     14,90 |
+| Desvio-padrão   |      2,82 |
+| Variância       |      7,93 |
+
+## Principais Observações
+
+::: callout-note
+### Resultados
+
+-   A taxa média de desemprego foi de **9,64%** ao longo do período analisado.
+-   A mediana (**8,80%**) é inferior à média, sugerindo **leve assimetria à direita** na distribuição dos valores.
+-   A taxa variou entre **5,10%** e **14,90%**, evidenciando elevada variabilidade ao longo do período.
+-   O desvio-padrão de **2,82** indica variabilidade moderada da série.
+-   Os quartis indicam que **50% das observações** concentraram-se entre **7,13%** e **12,10%**.
+:::
+
+## Evolução Temporal da Taxa de Desemprego
+
+![](desemprego1.png){width="85%"}
+
+## Principais Observações
+
+::: callout-note
+### Resultados
+
+-   A taxa de desemprego apresentou oscilações significativas ao longo do período analisado.
+-   Entre **2015 e 2017**, observou-se crescimento expressivo da taxa de desemprego.
+-   O maior nível da série foi registrado entre **2020 e 2021**, período marcado pelos impactos econômicos da pandemia de COVID-19.
+-   A partir de **2022**, verificou-se trajetória consistente de redução da taxa de desemprego.
+-   Nos períodos mais recentes, a série apresentou estabilização em níveis inferiores aos observados durante o pico da crise.
+:::
+
+## Sazonalidade da Taxa de Desemprego
+
+![](desemprego2.png){width="90%"}
+
+## Principais Observações
+
+::: caixa
+-   A série apresenta sazonalidade menos pronunciada quando comparada ao comércio varejista.
+
+-   As variações entre os anos são mais expressivas do que as variações entre os meses;
+
+-   Não se observa um padrão sazonal fortemente definido ao longo de todo o período;
+
+-   A dinâmica da série é influenciada principalmente pela tendência e por choques econômicos;
+
+-   Entre **2020 e 2021**, observam-se os maiores níveis de desemprego em praticamente todos os meses.
+:::
+
+## Decomposição da Taxa de Desemprego
+
+![](desemprego3.png){fig-align="center" width="85%"}
+
+## Principais Observações da Decomposição
+
+::: caixa
+-   A componente de tendência evidencia mudanças importantes na taxa de desemprego ao longo do período analisado;
+
+-   Entre **2015 e 2017**, observa-se crescimento da tendência, seguido de elevação até o pico registrado em **2021**;
+
+-   A partir de **2022**, verifica-se trajetória consistente de redução da taxa de desemprego;
+
+-   A componente sazonal permanece relativamente estável ao longo da série, indicando um padrão sazonal recorrente;
+
+-   Os resíduos permaneceram próximos de zero durante grande parte do período, com maior variabilidade entre **2020 e 2021**.
+:::
+
+## Função de Autocorrelação (ACF) da Taxa de Desemprego
+
+![](desemprego4.png){fig-align="center" width="85%"}
+
+## Principais Observações da ACF
+
+::: caixa
+-   As autocorrelações permanecem positivas e elevadas ao longo das defasagens analisadas;
+
+-   O decaimento gradual das autocorrelações indica forte dependência temporal entre as observações;
+
+-   O comportamento da ACF evidencia a presença de tendência na série;
+
+-   Não são observados picos sazonais tão pronunciados quanto os verificados na série do comércio varejista;
+
+-   Esses resultados reforçam a predominância da tendência sobre a sazonalidade na dinâmica da taxa de desemprego.
+:::
+
+## Identificação de Outliers via STL
+
+![](desemprego5.png){width="90%"}
+
+## Principais Observações dos Outliers
+
+::: caixa
+-   A decomposição STL permitiu identificar observações atípicas na série;
+
+-   A maior parte dos resíduos permaneceu próxima do comportamento esperado;
+
+-   Os principais desvios concentraram-se entre 2020 e 2021, período associado aos impactos da pandemia de COVID-19;
+
+-   Os eventos observados representam choques temporários, sem alterar a estrutura geral da série.
+:::
+
+## Validação dos modelos ETS
+
+::: caixa
+#### Estratégia de Validação
+
+-   A série foi dividida em **conjunto de treinamento** e **conjunto de teste**;
+
+-   Os **12 meses mais recentes** foram reservados para validação;
+
+-   Foram ajustados cinco modelos de suavização exponencial (ETS);
+
+-   As previsões foram comparadas com os valores observados no conjunto de teste;
+
+-   O modelo de melhor desempenho foi selecionado com base no **menor valor do MAPE**.
+:::
+
+## Comparação dos Modelos ETS
+
+Foram comparados cinco modelos de suavização exponencial (ETS) utilizando o conjunto de teste, adotando-se como critério de seleção o menor valor do MAPE
+
+| **Modelo**                        |  **RMSE** |   **MAE** | **MAPE (%)** |
+|:----------------------------------|----------:|----------:|-------------:|
+| SES                               |     1,017 |     0,967 |       17,532 |
+| Holt                              |     0,383 |     0,285 |        4,965 |
+| Holt amortecido                   |     0,383 |     0,285 |        4,965 |
+| **Holt-Winters aditivo (AAA)**    | **0,239** | **0,212** |    **3,741** |
+| Holt-Winters multiplicativo (MAM) |     0,412 |     0,369 |        6,696 |
+
+## Principais Resultados
+
+::: caixa
+-   Os modelos **Holt**, **Holt amortecido** e **Holt-Winters** apresentaram desempenho superior ao modelo **SES**;
+
+-   O modelo **Holt-Winters aditivo (AAA**) apresentou os menores valores de **RMSE (0,239)**, **MAE (0,212)** e **MAPE (3,741%)**;
+
+-   Como critério de seleção foi adotado o **menor valor de MAPE**, esse modelo foi escolhido para representar a série da **Taxa de Desemprego**.
+:::
+
+## Validação do Modelo Holt-Winters Aditivo
+
+![](avaliação_2.png)
+
+## Interpretação
+
+::: caixa
+-   As previsões acompanharam satisfatoriamente o comportamento da taxa de desemprego no conjunto de teste;
+
+-   O modelo reproduziu adequadamente a tendência de redução observada ao final da série;
+
+-   A maior parte dos valores observados permaneceu próxima das previsões e contida nos respectivos intervalos de previsão;
+
+-   Esse resultado é consistente com as medidas de acurácia obtidas, justificando a seleção do modelo Holt-Winters aditivo para a geração das previsões.
+:::
+
+## Previsão para os Próximos 12 Meses
+
+![](desemprego7.png){width="90%"}
+
+## Principais Resultados da Previsão
+
+::: caixa
+-   O modelo projeta a continuidade da tendência de redução da taxa de desemprego ao longo do horizonte de previsão;
+
+-   As previsões indicam que a taxa deverá permanecer entre aproximadamente **4,46%** e **5,55%**;
+
+-   Observam-se apenas pequenas oscilações sazonais, mantendo níveis relativamente baixos de desemprego;
+
+-   Os intervalos de previsão tornam-se gradualmente mais amplos, refletindo o aumento da incerteza das estimativas futuras.
+:::
+
+## Diagnóstico dos Resíduos
+
+![](desemprego8.png){width="90%"}
+
+## Principais Resultados dos Resíduos
+
+::: caixa
+-   Os resíduos permanecem distribuídos em torno de zero durante grande parte do período analisado;
+
+-   Observa-se maior variabilidade entre **2020 e 2021**, refletindo as oscilações excepcionais desse período;
+
+-   A função de autocorrelação (ACF) indica a presença de algumas autocorrelações significativas em determinadas defasagens;
+
+-   O histograma apresenta distribuição aproximadamente simétrica em torno de zero.
+:::
+
+## Teste de Ljung-Box
+
+Para complementar a análise gráfica, foi aplicado o **teste de Ljung-Box** aos resíduos, com o objetivo de verificar a existência de autocorrelação residual.
+
+| **Estatística**       |           **Valor** |
+|:----------------------|--------------------:|
+| Estatística (Q\^\*)   |              162,54 |
+| Graus de liberdade    |                  24 |
+| Valor-p               | \< 2,2 × 10$^{-16}$ |
+| Defasagens utilizadas |                  24 |
+| Modelo df             |                   0 |
+
+## Interpretação
+
+::: caixa-azul
+### Resultados
+
+-   O valor-p (**\< 2,2 × 10**$^{-16}$) é inferior ao nível de significância de **5%**.
+-   Assim, rejeita-se a hipótese de ausência de autocorrelação nos resíduos.
+-   Há evidências estatisticamente significativas de dependência temporal residual.
+-   Embora o modelo Holt-Winters aditivo apresente bom desempenho preditivo, ele não capturou completamente toda a estrutura de autocorrelação da série.
+:::
+
+## Conclusão - Taxa de Desemprego
+
+::: caixa
+-   A série apresentou forte influência dos ciclos econômicos ao longo do período analisado;
+
+-   O maior nível de desemprego foi observado entre **2020 e 2021**, refletindo os impactos econômicos da pandemia de COVID-19;
+
+-   A partir de **2022**, verificou-se trajetória consistente de redução da taxa de desemprego;
+
+-   A decomposição e a ACF evidenciaram predominância da tendência e sazonalidade pouco pronunciada;
+
+-   O modelo **Holt-Winters aditivo (ETS(A,A,A))** apresentou o melhor desempenho preditivo, com **MAPE de 3,741%**;
+
+-   O diagnóstico dos resíduos indicou bom ajuste do modelo, embora ainda existam evidências de autocorrelação residual.
+:::
+
+## Fontes dos Dados
+
+::: caixa
+-   IBGE – SIDRA (Tabela 8880)\
+    \
+    https://sidra.ibge.gov.br/tabela/8880
+
+-   IPEA – IPEADATA\
+    \
+    https://www.ipeadata.gov.br/
+:::
+
+## Agradecimentos
+
+::: caixa
+-   Agradeço a atenção de todos!
+:::

@@ -1,0 +1,463 @@
+---
+title: ""
+author: ""
+
+format:
+  pdf:
+    include-before-body: capa.tex
+
+editor: visual
+
+execute:
+  warning: true
+  message: true
+---
+
+## Introdução
+
+As séries temporais são conjuntos de dados observações ou métricas registrados sequencialmente em intervalos de tempo regulares (diário, mensal, anual). Elas mostram a evolução de uma variável, permitindo analisar tendências, ciclos e padrões, sendo fundamentais para previsões futuras em áreas como finanças, meteorologia e monitoramento de sistemas.
+
+Entre os principais componentes de uma série temporal destacam-se a tendência, a sazonalidade e sem tendência. A tendência representa o comportamento de crescimento ou redução da série ao longo do tempo. A sazonalidade corresponde aos padrões que se repetem em intervalos regulares, como meses ou estações do ano. Já os sem tendência representa oscilações não previsíveis presentes nos dados.
+
+A análise de séries temporais possui grande relevância prática, pois permite compreender o comportamento histórico das variáveis e auxiliar na realização de previsões futuras. Além disso, técnicas gráficas e métodos estatísticos possibilitam decompor as séries em diferentes componentes, facilitando a interpretação dos dados.
+
+Nesta atividade foram analisados diferentes conjuntos de dados temporais, considerando frequências diárias, mensais e trimestrais. O objetivo foi verificar como a transformação da escala temporal influencia a visualização e interpretação das séries.
+
+# Objetivos Específicos
+
+Os objetivos específicos que serão abordados são:
+
+-   Construir gráficos de séries temporais;
+-   Identificar padrões de tendência nas séries;
+-   Verificar a presença de sazonalidade;
+-   fazer a transformação dos dados originais para anual ou trimestral;
+-   Interpretar os componentes das séries temporais.
+
+# Metodologia
+
+Para o desenvolvimento deste trabalho foram utilizados bancos de dados em formato CSV contendo informações temporais de diferentes contextos. Foram utilizadas bibliotecas específicas para manipulação e visualização de dados, como dplyr, ggplot2, lubridate e tidyr.
+
+Inicialmente, os dados foram importados e organizados em formato adequado para séries temporais. Em seguida, foram construídos gráficos para visualização do comportamento das séries ao longo do tempo. Posteriormente, foram realizadas transformações na frequência temporal dos dados, convertendo as séries para escalas mensais e trimestrais, com o objetivo de comparar os padrões observados e verificar possíveis mudanças na interpretação das séries.
+
+Os conjuntos de dados utilizados foram:
+
+-   Dados climáticos extraido do kaggle;
+
+-   O dataset dos dados covid;
+
+-   O dataset dos dados desmatamento
+
+# Resultados e Discussões
+
+# Pacotes que serão utilizados na análise
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(forecast)
+library(tseries)
+library(ggplot2)
+library(gridExtra)
+```
+
+# Questão 1) a- Importação dos dados
+
+```{r}
+
+# Leitura do dataset
+dados <- read.csv("C:/Users/dudas/OneDrive/Área de Trabalho/disciplinas_do_7_periodo/series_temporais/DailyDelhiClimateTrain.csv")
+
+# Visualizar estrutura
+str(dados)
+
+# Converter coluna de data
+dados$date <- ymd(dados$date)
+
+# Ordenar por data
+dados <- dados %>%
+  arrange(date)
+
+# Verificar dados
+head(dados)
+```
+
+Aqui fizemos a leitura dos dados originais do conjunto de dados. Ele é totalmente dedicado a desenvolvedores que desejam treinar modelos de previsão do tempo para o clima indiano. Contendo informações de janeiro de 2013 á Abril de 2017 na cidade de Delhi, Índia. E os 4 parâmetros dessa base de dados são: temperatura, média,umidade, velocidade do vento e pressão média.
+
+# Questão b e c- Gráficos das séries temporais e Interpretação das series
+
+## Temperatura
+
+```{r}
+ggplot(dados,
+       aes(x = date,
+           y = meantemp)) +
+  geom_line(color = "steelblue") +
+  labs(title = "Série Temporal - Temperatura Média",
+       x = "Tempo",
+       y = "Temperatura") +
+  theme_minimal()
+```
+
+### Interpretação
+
+A série de temperatura apresentou um comportamento de série sazonal evidente, com padrões periódicos de aumento e redução ao longo do tempo. Não foi observada tendência significativa de crescimento ou queda, indicando estabilidade na média da série.
+
+## Umidade
+
+```{r}
+ggplot(dados,
+       aes(x = date,
+           y = humidity)) +
+  geom_line(color = "darkred") +
+  labs(title = "Série Temporal - Umidade",
+       x = "Tempo",
+       y = "Umidade") +
+  theme_minimal()
+```
+
+### Interpretação
+
+Para o gráfico da variável umidade, observa-se que ela é uma série sazonal. Pois ao passar dos anos ela fica oscilando sem evidencia clara de crescimento ou queda continua ao longo do tempo.
+
+## Velocidade do vento
+
+```{r}
+ggplot(dados,
+       aes(x = date,
+           y = wind_speed)) +
+  geom_line(color = "darkgreen") +
+  labs(title = "Série Temporal - Velocidade do Vento",
+       x = "Tempo",
+       y = "Velocidade do vento") +
+  theme_minimal()
+```
+
+### Interpretação
+
+Para o gráfico da variável velocidade do vento observa-se que existe uma forte variabilidade, com possiveis padrões sazonais e sem presença de tendencia clara. Portanto, o gráfico acima apresenta uma série sazonal fraca, comparado as de temperatura e umidade. Entretanto, existe alguns periodos que o vento aumenta e outros que diminui. E esse comportamento é repetido várias vezes ao longo dos anos.
+
+## Pressão atmosférica
+
+```{r}
+ggplot(dados,
+       aes(x = date,
+           y = meanpressure)) +
+  geom_line(color = "purple") +
+  labs(title = "Série Temporal - Pressão Atmosférica",
+       x = "Tempo",
+       y = "Pressão") +
+  theme_minimal()
+```
+
+### Interpretação
+
+A série temporal da pressão atmosférica apresenta um comportamento relativamente estável ao longo do período analisado, sem evidências claras de tendência ou sazonalidade significativa. Entretanto, observa-se diversos valores extremos (outliers), incluindo picos muito elevados indicando possíveis inconsistências nos dados ou falhas de medição. Esses valores anômalos afetam a visualização e interpretação da série, sendo recomendável o tratamento dos dados antes de uma análises.
+
+# Questão d - Mudando a medida de tempo das séries para mensal e repetindo as análises da letra a e c temos:
+
+## Transformação os dados para mensal
+
+```{r}
+dados$date <- as.Date(dados$date)
+
+dados_mensal <- dados %>%
+  group_by(mes = floor_date(date, "month")) %>%
+  summarise(
+    meantemp = mean(meantemp),
+    humidity = mean(humidity),
+    wind_speed = mean(wind_speed),
+    meanpressure = mean(meanpressure)
+  )
+```
+
+# Gráficos mensais
+
+### Temperatura
+
+```{r}
+ggplot(dados_mensal, aes(mes, meantemp)) +
+  geom_line(color = "steelblue") +
+  theme_minimal() +
+  labs(title = "Temperatura Média - Mensal")
+```
+
+### Interpretação
+
+Observa-se que depois da tranformação dos dados para mensal, ficou mais claro e fácil de ve a presença da sazonalidade . Nota-se padrões periódicos bem definidos de aumento e redução da temperatura oa longo dos anos.
+
+## Umidade
+
+```{r}
+ggplot(dados_mensal, aes(mes, humidity)) +
+  geom_line(color = "darkred") +
+  theme_minimal() +
+  labs(title = "Umidade - Mensal")
+```
+
+### Interpretação
+
+Observa-se que depois da tranformação dos dados para mensal, teve uma suavização as oscilação de curto prazo, reduzindo o ruído e tornando o comportamento sazonal mais perceptível.
+
+## Vento (mensal)
+
+```{r}
+ggplot(dados_mensal, aes(mes, wind_speed)) +
+  geom_line(color = "darkgreen") +
+  theme_minimal() +
+  labs(title = "Velocidade do Vento - Mensal")
+```
+
+### Interpretação
+
+Observa-se que depois da tranformação dos dados para mensal, o comportamneto sazonal da série ficou mais evidente e fácil percepção. Onde vemos que a velocidade do vento fica oscilando ao decorrer dos anos.
+
+## Pressão (mensal)
+
+```{r}
+ggplot(dados_mensal, aes(mes, meanpressure)) +
+  geom_line(color = "purple") +
+  theme_minimal() +
+  labs(title = "Pressão Atmosférica - Mensal")
+```
+
+### Interpretação
+
+Observa-se que depois da tranformação dos dados para mensal, temos uma melhor visualizaçaõ. Nota-se que existe alguns picos elevados e baixos da pressão atmosferica.
+
+## Questão e mudando a medida de tempo das séries para trimestral e repetindo as análises da letra a e c temos:
+
+## Transformação para trimestral
+
+```{r}
+dados$date <- as.Date(dados$date)
+
+dados_trimestral <- dados %>%
+  group_by(trimestre = floor_date(date, "quarter")) %>%
+  summarise(
+    meantemp = mean(meantemp),
+    humidity = mean(humidity),
+    wind_speed = mean(wind_speed),
+    meanpressure = mean(meanpressure)
+  )
+```
+
+# Gráficos trimestrais
+
+## Temperatura
+
+```{r}
+ggplot(dados_trimestral, aes(trimestre, meantemp)) +
+  geom_line(color = "steelblue") +
+  theme_minimal() +
+  labs(title = "Temperatura Média - Trimestral")
+```
+
+## Umidade
+
+```{r}
+ggplot(dados_trimestral, aes(trimestre, humidity)) +
+  geom_line(color = "darkred") +
+  theme_minimal() +
+  labs(title = "Umidade - Trimestral")
+```
+
+## Vento
+
+```{r}
+ggplot(dados_trimestral, aes(trimestre, wind_speed)) +
+  geom_line(color = "darkgreen") +
+  theme_minimal() +
+  labs(title = "Velocidade do Vento - Trimestral")
+```
+
+## Pressão
+
+```{r}
+ggplot(dados_trimestral, aes(trimestre, meanpressure)) +
+  geom_line(color = "purple") +
+  theme_minimal() +
+  labs(title = "Pressão Atmosférica - Trimestral")
+```
+
+# Conclusão
+
+Portanto, concluimos que a análise das séries temporais climáticas de Delhi mostrou que as variáveis temperatura e umidade apresentam sazonalidade mais evidente, com padrões que se repetem ao longo do tempo. A velocidade do vento apresentou maior variabilidade e sazonalidade mais fraca, enquanto a pressão atmosférica mostrou comportamento mais estável, porém com presença de valores extremos. Após a transformação das séries para frequência mensal e trimestral, os ruídos das oscilações diárias foram reduzidos, tornando os padrões sazonais mais visíveis e facilitando a interpretação das séries temporais.
+
+# Questão 2) a e b- Escolher um país e construir os gráficos das séries para cada variável e identificando caracteristicas que estão presentes nas séries
+
+### O banco de dados todo é dado por:
+
+Irei escolher o Brasil para fazer a minha análise e concluir sobre ela.
+
+## Baixando o banco de dados completo e filtrando o Brasil para as análises
+
+```{r}
+# Carregando a base de dados
+dados <- read.csv("C:/Users/dudas/OneDrive/Área de Trabalho/disciplinas_do_7_periodo/series_temporais/vaccinations.csv")
+
+# Transformando a data
+dados$date <- as.Date(dados$date)
+
+# Filtrando apenas o Brasil
+brasil <- dados %>%
+  filter(location == "Brazil")
+```
+
+# Gráficos das séries
+
+### Total de vacinações
+
+```{r}
+ggplot(brasil, aes(x = date, y = total_vaccinations)) +
+  geom_line(color = "blue") +
+  labs(title = "Total de vacinações - Brasil",
+       x = "Data",
+       y = "Total de doses") +
+  theme_minimal()
+
+```
+
+#### Interpretação
+
+As caracteristicas observada da série do total de vacinação é:
+
+-   Forte tendência crescente;
+
+-   Tem um crescimento continuo ao longo do tempo;
+
+-   Ausência de sazonalidade;
+
+-   É uma série não estacionária.
+
+Portanto, conclui-se que a série apresenta um comportamento acumulativo , aumentando continuamenteconforme novas doses são aplicadas na população.
+
+### Pessoas vacinadas
+
+```{r}
+ggplot(brasil, aes(x = date, y = people_vaccinated)) +
+  geom_line(color = "darkgreen") +
+  labs(title = "Pessoas vacinadas - Brasil",
+       x = "Data",
+       y = "Pessoas vacinadas") +
+  theme_minimal()
+```
+
+#### Interpretação
+
+As caracteristicas observada da série de pessoas vacinadas é:
+
+-   Tendência crescente;
+
+-   Tem um crescimento acelerado no inicío e desaceleração posteriormente;
+
+-   Ausência de sazonalidade;
+
+-   Tem um comportamento semelhante a de uma curva logística.
+
+Portanto, conclui-se que o número de pessoas vacinadas cresce rapidamente no início da campanha da vacinação e depois desacelera á medidade que grande parte da população ja tenha sido vacinada.
+
+### Pessoas totalmente vacinadas
+
+```{r}
+ggplot(brasil, aes(x = date, y = people_fully_vaccinated)) +
+  geom_line(color = "purple") +
+  labs(title = "Pessoas totalmente vacinadas - Brasil",
+       x = "Data",
+       y = "Pessoas totalmente vacinadas") +
+  theme_minimal()
+```
+
+#### Interpretação
+
+As caracteristicas observada da série de pessoas totalmente vacinadas é:
+
+-   Tendência crescente;
+
+-   Crescimento com atraso em relação à primeira dose;
+
+-   Ausência de sazonalidade;
+
+-   É uma série não estacionária.
+
+Portanto, conclui-se que a séria acompanha a imunização completa da população. E o atraso em relação à série de pessoas vacinadas ocorre devido ao intervalo necessário entre cada doses.
+
+### Vacinação diária
+
+```{r}
+ggplot(brasil, aes(x = date, y = daily_vaccinations)) +
+  geom_line(color = "red") +
+  labs(title = "Vacinação diária - Brasil",
+       x = "Data",
+       y = "Doses diárias") +
+  theme_minimal()
+```
+
+#### Interpretação
+
+As caracteristicas observada da série da vacinação diária é:
+
+-   Oscilação ao longo do tempo;
+
+-   Presença de picos e quedas;
+
+-   Ausência de sazonalidade definida;
+
+-   Uma alta variabilidade.
+
+Portanto, conclui-se que a vacinação diária sofre influência da disponibilidade de vacinas, campanhas de imunização, logística de distribuição e políticas públicas. Os picos representam períodos de maior aplicação de doses.
+
+# Conclusão
+
+Concluimos que as séries acumulativas de vacinação apresentam uma forte tendência crescente ao longo do tempo, característica típica de variáveis acumuladas. Essas séries não apresentaram sazonalidade, pois não possuem padrões periódicos que se repetem regularmente. Já a série de vacinação diária apresentou oscilações, com períodos de crescimento e redução no número de doses aplicadas, refletindo mudanças no ritmo da campanha de vacinação. Apesar das flutuações observadas, não foi identificada sazonalidade clara na série.
+
+# Questão 3) a e b - Construindo gráficos das séries para cada estado e identificando caracteristicas que estão presentes nas séries
+
+## Importação e preparação dos dados
+
+```{r}
+
+# Leitura da base
+dados <- read.csv("C:/Users/dudas/OneDrive/Área de Trabalho/disciplinas_do_7_periodo/series_temporais/desmatamento_prodes.csv")
+
+# Visualizar estrutura
+str(dados)
+
+```
+
+## Gráficos das séries temporais
+
+Aqui estão todas as séries por estado
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+dados_long <- dados %>%
+  pivot_longer(
+    cols = acre:tocantins,
+    names_to = "estado",
+    values_to = "desmatamento"
+  )
+
+ggplot(dados_long,
+       aes(x = referencia,
+           y = desmatamento,
+           color = estado)) +
+  geom_line() +
+  facet_wrap(~estado, scales = "free_y") +
+  theme_minimal() +
+  labs(title = "Séries temporais do desmatamento por estado",
+       x = "Ano",
+       y = "Área desmatada")
+```
+
+### Interpretação das séries
+
+As séries temporais de desmatamento apresentaram comportamentos distintos entre os estados analisados. Os estados do Pará e Mato Grosso apresentaram os maiores níveis de desmatamento ao longo dos anos, com períodos de forte crescimento seguidos de redução.
+
+O estado do Amazonas apresentou tendência de crescimento mais recente, indicando aumento do desmatamento nos últimos anos. Já Rondônia apresentou grandes oscilações ao longo do período, enquanto Tocantins mostrou tendência de redução contínua do desmatamento.
+
+Os estados do Acre, Amapá, Maranhão e Roraima apresentaram menor intensidade de desmatamento, porém com variações ao longo do tempo.
+
+De modo geral, observa-se presença de tendência em algumas séries, principalmente associada ao aumento ou redução do desmatamento em determinados períodos. Entretanto, não foi identificada sazonalidade clara, pois os dados anuais não apresentam padrões periódicos que se repetem regularmente ao longo do tempo.

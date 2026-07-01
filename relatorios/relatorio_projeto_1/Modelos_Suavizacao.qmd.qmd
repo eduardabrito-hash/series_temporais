@@ -1,0 +1,559 @@
+---
+title: ""
+author: ""
+
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    toc-location: left
+
+editor: visual
+
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{=html}
+<style>
+body {
+  text-align: justify;
+}
+
+p {
+  text-align: justify;
+}
+</style>
+```
+
+::: {style="text-align:center; margin-top:40px;"}
+<h2><b> RELATÓRIO SOBRE MODELOS DE SUAVIZAÇÃO EXPONENCIAL</b></h2>
+
+<h4>Disciplina de Séries Temporais</h4>
+
+<br><br>
+
+<b>Discente:</b> Eduarda da Silva Brito<br> <b>Docente:</b> Pedro Monteiro de Almeida Júnior<br> <b>Curso:</b> Bacharelado em Estatística – UEPB
+:::
+
+<br><br>
+
+## Resumo {.unnumbered}
+
+Este trabalho teve como objetivo analisar o comportamento temporal do Índice de Volume de Vendas do Comércio Varejista e da Taxa de Desemprego no Brasil, por meio de técnicas de análise exploratória e de modelagem por suavização exponencial (ETS). Foram utilizadas séries mensais obtidas junto ao Sistema IBGE de Recuperação Automática (SIDRA/IBGE) e ao IPEADATA, abrangendo, respectivamente, os períodos de janeiro de 2000 a março de 2026 e de março de 2012 a abril de 2026. Inicialmente, realizou-se o tratamento e a análise exploratória dos dados, incluindo estatísticas descritivas, inspeção gráfica, análise de sazonalidade, decomposição das séries, funções de autocorrelação (ACF) e autocorrelação parcial (PACF), além da identificação de valores atípicos por meio da decomposição STL. Em seguida, foram ajustados e comparados cinco modelos de suavização exponencial para cada série, utilizando como critério de seleção o menor erro percentual absoluto médio (MAPE). Os resultados evidenciaram que o Índice de Volume de Vendas do Comércio Varejista apresenta tendência crescente e sazonalidade bem definida, enquanto a Taxa de Desemprego apresenta sazonalidade menos pronunciada, sendo fortemente influenciada por eventos econômicos. O modelo Holt-Winters multiplicativo apresentou o melhor desempenho para a série do comércio varejista, ao passo que o modelo Holt-Winters aditivo foi o mais adequado para a Taxa de Desemprego. As previsões obtidas reproduziram satisfatoriamente os principais padrões observados nas séries, demonstrando a aplicabilidade dos modelos ETS para a análise e previsão de indicadores econômicos.
+
+**Palavras-chaves**: séries temporais; suavização exponencial; comércio varejista; taxa de desemprego; previsão.
+
+# Introdução
+
+A disponibilidade de informações coletadas periodicamente tem ampliado a utilização de métodos estatísticos voltados à análise da evolução de fenômenos ao longo do tempo. Nesse contexto, as séries temporais reúnem observações registradas em ordem cronológica, possibilitando investigar padrões de comportamento, identificar mudanças ocorridas na variável de interesse e produzir previsões para períodos futuros. Como as observações geralmente apresentam dependência temporal, o estudo dessa estrutura torna-se fundamental para compreender a dinâmica dos dados e subsidiar processos de planejamento e tomada de decisão (HYNDMAN; ATHANASOPOULOS, 2021; SHUMWAY; STOFFER, 2017).
+
+A interpretação de uma série temporal fundamenta-se na identificação de seus principais componentes. A tendência representa a direção predominante da série ao longo do tempo, podendo indicar crescimento, estabilidade ou declínio, enquanto a sazonalidade corresponde a oscilações que se repetem em intervalos regulares. Além desses componentes, podem ocorrer movimentos cíclicos, relacionados a flutuações de longo prazo, e uma componente irregular, responsável pelas variações aleatórias não explicadas pelos demais elementos da série. A identificação desses padrões constitui uma etapa essencial para a seleção de métodos de modelagem e previsão adequados (BROCKWELL; DAVIS, 2016).
+
+Entre as técnicas utilizadas para modelagem e previsão de séries temporais, destacam-se os modelos de suavização exponencial (Exponential Smoothing – ETS), amplamente empregados por sua simplicidade, flexibilidade e capacidade de adaptação a diferentes comportamentos da série. Esses modelos atribuem maior peso às observações mais recentes, permitindo representar diferentes combinações de nível, tendência e sazonalidade. Entre os principais métodos destacam-se a Suavização Exponencial Simples, o método de Holt e os modelos de Holt-Winters nas versões aditiva e multiplicativa (MONTGOMERY; JENNINGS; KULAHCI, 2015; HYNDMAN; ATHANASOPOULOS, 2021).
+
+Antes da etapa de modelagem, a realização de uma análise exploratória é indispensável para compreender o comportamento dos dados. A inspeção da série temporal por meio de gráficos, a análise de sazonalidade, os gráficos de subséries, a decomposição da série, as funções de autocorrelação (ACF) e autocorrelação parcial (PACF), além da identificação de observações atípicas, fornecem informações importantes sobre a estrutura temporal dos dados e auxiliam na escolha dos modelos mais adequados (CHATFIELD, 2016; CRYER; CHAN, 2008; MONTGOMERY; JENNINGS; KULAHCI, 2015).
+
+O presente estudo utiliza duas séries temporais mensais relacionadas à economia brasileira. A primeira corresponde ao Índice de Volume de Vendas do Comércio Varejista, disponibilizado pelo Sistema IBGE de Recuperação Automática (SIDRA/IBGE), considerado um importante indicador da atividade comercial do país (IBGE, 2024). A segunda refere-se à Taxa de Desemprego, obtida no IPEADATA a partir das informações da Pesquisa Nacional por Amostra de Domicílios Contínua (PNAD Contínua/IBGE), indicador que retrata o comportamento do mercado de trabalho brasileiro (IPEA, 2024).
+
+A análise conjunta dessas séries permite investigar dois importantes indicadores econômicos sob perspectivas complementares. Enquanto o Índice de Volume de Vendas do Comércio Varejista reflete a evolução do consumo das famílias e da atividade comercial, a Taxa de Desemprego expressa as condições do mercado de trabalho. Dessa forma, torna-se possível comparar diferentes comportamentos temporais, como tendência, sazonalidade e variabilidade, evidenciando a aplicação dos métodos de séries temporais na análise de indicadores econômicos.
+
+Diante desse contexto, o presente trabalho tem como objetivo analisar o comportamento temporal do Índice de Volume de Vendas do Comércio Varejista e da Taxa de Desemprego no Brasil por meio do tratamento das bases de dados, da análise exploratória e da modelagem utilizando modelos de suavização exponencial (ETS). Além disso, busca-se comparar diferentes especificações desses modelos por meio da divisão das séries em conjuntos de treinamento e teste, avaliando o desempenho preditivo por meio de medidas de acurácia e selecionando o modelo de melhor desempenho para, posteriormente, realizar previsões para os períodos futuros.
+
+# Materiais e Métodos
+
+## Bases de Dados
+
+Foram utilizadas duas séries temporais mensais relacionadas à economia brasileira. A primeira corresponde ao Índice de Volume de Vendas do Comércio Varejista, obtido por meio do Sistema IBGE de Recuperação Automática (SIDRA/IBGE), especificamente da Tabela 8880, que disponibiliza indicadores da atividade comercial no país. A segunda série corresponde à Taxa de Desemprego, obtida na plataforma IPEADATA, a partir dos dados da Pesquisa Nacional por Amostra de Domicílios Contínua (PNAD Contínua/IBGE), que retratam as condições do mercado de trabalho brasileiro. Ambas as séries possuem frequência mensal e foram utilizadas nas etapas de tratamento dos dados, análise exploratória, modelagem por suavização exponencial (ETS) e geração de previsões.
+
+## Tratamento dos Dados
+
+### Importação das Bases
+
+As bases de dados foram importadas para o ambiente R utilizando o pacote `read`, por meio da `read\_csv2`, apropriada para a leitura de arquivos no formato CSV com separador de ponto e vírgula. Em seguida, realizou-se uma inspeção inicial dos dados mediante a verificação da estrutura das variáveis, das primeiras observações, da dimensão das tabelas e da presença de valores ausentes, visando assegurar a consistência e a integridade das informações antes das etapas de tratamento e análise.
+
+### Tratamento da Série do Comércio Varejista
+
+Para a série do Índice de Volume de Vendas do Comércio Varejista, foi necessário realizar um tratamento adicional em virtude da estrutura do arquivo disponibilizado pelo SIDRA/IBGE. Inicialmente, as datas e os valores da série foram extraídos diretamente do arquivo-texto, removendo-se caracteres desnecessários, como aspas e ajustando o separador decimal para o padrão utilizado pelo R. Em seguida, os valores foram convertidos para o tipo numérico e organizados em uma nova base de dados contendo as variáveis correspondentes ao período de referência e ao índice de vendas.
+
+Após a organização da base, realizaram-se verificações para confirmar a ausência de valores ausentes, bem como inspeções da estrutura, da dimensão e das estatísticas descritivas da série tratada. Posteriormente, os dados foram convertidos para o formato de série temporal por meio da função `ts()`, considerando frequência mensal (12 observações por ano) e início em janeiro de 2000. Por fim, a base tratada foi exportada para um arquivo no formato CSV, possibilitando sua utilização nas etapas subsequentes da análise.
+
+### Tratamento da Série da Taxa de Desemprego
+
+A base referente à Taxa de Desemprego também passou por procedimentos de tratamento e padronização. Inicialmente, foi realizada a remoção de uma coluna sem informações relevantes e a padronização dos nomes das variáveis. Em seguida, a variável correspondente às datas foi convertida para o formato de data do R (Date), permitindo sua correta manipulação durante as análises.
+
+Após o tratamento, realizaram-se verificações da estrutura da base, analisando presença de valores ausentes, das estatísticas descritivas e do período abrangido pela série. Posteriormente, os dados foram convertidos para o formato de série temporal por meio da função `ts()`, considerando frequência mensal e início em março de 2012. Por fim, a base tratada foi exportada para um arquivo no formato CSV, possibilitando sua utilização nas etapas de análise exploratória, modelagem e previsão.
+
+## Análise Exploratória
+
+A análise exploratória foi realizada com o objetivo de caracterizar o comportamento das séries temporais e identificar propriedades relevantes para a etapa de modelagem. Inicialmente, foram verificadas a estrutura das bases de dados, a dimensão dos conjuntos de dados e a presença de valores ausentes, assegurando a consistência das informações utilizadas nas análises.
+
+De forma geral, uma série temporal pode ser representada por uma sequência de observações ordenadas cronologicamente,
+
+$$
+Y=\{Y_1,Y_2,\ldots,Y_T\},
+$$
+
+em que $Y_t$ representa o valor observado no instante $t$ e $T$ corresponde ao número total de observações da série.
+
+Em seguida, foram calculadas estatísticas descritivas para ambas as séries, incluindo medidas de posição (média e mediana) e de dispersão (desvio-padrão e variância), além dos valores mínimo e máximo. Essas estatísticas permitiram obter uma visão geral da distribuição dos dados e de sua variabilidade ao longo do período analisado.
+
+Posteriormente, as bases de dados foram convertidas em objetos da classe `ts`, considerando frequência mensal, possibilitando a aplicação de técnicas específicas para análise de séries temporais. Além disso, foram construídos objetos no formato *tsibble*, por meio do pacote `fpp3`, para utilização de recursos gráficos voltados à investigação da sazonalidade.
+
+A inspeção visual das séries foi realizada por meio de gráficos de linhas, permitindo identificar tendências, oscilações e possíveis mudanças de comportamento ao longo do tempo. A sazonalidade foi investigada utilizando gráficos sazonais (*season plots*) e gráficos de subséries sazonais (*subseries plots*), que possibilitam comparar o comportamento dos diferentes meses ao longo dos anos.
+
+A decomposição das séries temporais foi empregada para separar os componentes de tendência, sazonalidade e irregularidade. Para o Índice de Volume de Vendas do Comércio Varejista foi utilizada a decomposição multiplicativa, enquanto para a Taxa de Desemprego foi empregada a decomposição aditiva, em função das características observadas em cada série (HYNDMAN; ATHANASOPOULOS, 2021).
+
+Na decomposição clássica aditiva, a série temporal é representada por
+
+$$
+Y_t = T_t + S_t + R_t,
+$$
+
+enquanto na decomposição multiplicativa a representação é dada por
+
+$$
+Y_t = T_t \times S_t \times R_t,
+$$
+
+em que $Y_t$ representa a série observada, $T_t$ corresponde ao componente de tendência, $S_t$ ao componente sazonal e $R_t$ ao componente irregular ou aleatório.
+
+A dependência temporal foi avaliada por meio das funções de autocorrelação (ACF) e autocorrelação parcial (PACF), as quais fornecem informações sobre a estrutura de correlação entre observações em diferentes defasagens e auxiliam na compreensão do comportamento temporal das séries (CHATFIELD, 2016).
+
+A autocorrelação amostral é estimada por
+
+$$
+r_k=
+\frac{\sum_{t=k+1}^{T}(y_t-\bar y)(y_{t-k}-\bar y)}
+{\sum_{t=1}^{T}(y_t-\bar y)^2},
+$$
+
+em que $r_k$ representa a autocorrelação na defasagem $k$, $y_t$ corresponde ao valor observado no instante $t$, $\bar y$ é a média amostral da série e $T$ representa o número total de observações.
+
+Adicionalmente, foram construídos histogramas e boxplots para avaliar a distribuição dos valores e identificar possíveis observações discrepantes. Complementarmente, a identificação de valores atípicos foi realizada por meio da decomposição STL (*Seasonal-Trend decomposition using Loess*), utilizando estimativas robustas da componente residual.
+
+Os possíveis outliers foram determinados com base no intervalo interquartil (IQR), definido por
+
+$$
+IQR = Q_3 - Q_1,
+$$
+
+em que $Q_1$ e $Q_3$ representam, respectivamente, o primeiro e o terceiro quartis da distribuição dos resíduos.
+
+Foram considerados outliers os resíduos inferiores a
+
+$$
+Q_1 - 3 \times IQR
+$$
+
+ou superiores a
+
+$$
+Q_3 + 3 \times IQR.
+$$
+
+## Modelagem por Suavização Exponencial (ETS)
+
+A modelagem das séries temporais foi realizada por meio dos modelos de Suavização Exponencial (*Exponential Smoothing* – ETS), implementados no pacote `forecast` do software R. Os modelos da família ETS são caracterizados pela combinação de três componentes: erro (E), tendência (T) e sazonalidade (S), os quais podem assumir formas aditiva (A), multiplicativa (M), amortecida (Ad) ou ausente (N), de acordo com as características da série temporal (HYNDMAN; ATHANASOPOULOS, 2021).
+
+Inicialmente, cada série foi dividida em dois subconjuntos: treinamento e teste. Em ambas as séries, os 12 meses mais recentes foram reservados para validação, enquanto as observações anteriores foram utilizadas para o ajuste dos modelos.
+
+Na série do Índice de Volume de Vendas do Comércio Varejista, o conjunto de treinamento compreendeu o período de janeiro de 2000 a março de 2025, enquanto o conjunto de teste correspondeu ao período de abril de 2025 a março de 2026. Para a Taxa de Desemprego, o conjunto de treinamento abrangeu o período de março de 2012 a abril de 2025, e o conjunto de teste compreendeu o intervalo entre maio de 2025 e abril de 2026.
+
+Foram ajustados cinco modelos de suavização exponencial para cada série: Suavização Exponencial Simples (ETS(A,N,N)), método de Holt (ETS(A,A,N)), Holt com tendência amortecida (ETS(A,Ad,N)), Holt-Winters aditivo (ETS(A,A,A)) e Holt-Winters multiplicativo (ETS(M,A,M)). Após o ajuste, foram geradas previsões para os 12 períodos correspondentes ao conjunto de teste, permitindo a comparação do desempenho preditivo dos diferentes modelos.
+
+O desempenho dos modelos foi avaliado por meio da função `accuracy()` do pacote `forecast`, que fornece diferentes medidas de acurácia, entre elas o erro médio (ME), a raiz do erro quadrático médio (RMSE), o erro absoluto médio (MAE), o erro percentual médio (MPE), o erro percentual absoluto médio (MAPE), o erro absoluto escalado médio (MASE) e a autocorrelação dos resíduos na primeira defasagem (ACF1).
+
+Como critério principal para a seleção do modelo de melhor desempenho, foi adotado o menor valor do erro percentual absoluto médio (MAPE), definido por
+
+$$
+MAPE=
+\frac{100}{n}
+\sum_{t=1}^{n}
+\left|
+\frac{y_t-\hat{y}_t}{y_t}
+\right|,
+$$
+
+em que $y_t$ representa o valor observado, $\hat{y}_t$ corresponde ao valor previsto e $n$ representa o número de observações utilizadas na avaliação do modelo.
+
+Após a etapa de validação, o modelo que apresentou o menor valor de MAPE foi reajustado utilizando todas as observações disponíveis de cada série temporal. Para o Índice de Volume de Vendas do Comércio Varejista foi selecionado o modelo Holt-Winters multiplicativo (ETS(M,A,M)), enquanto para a Taxa de Desemprego foi selecionado o modelo Holt-Winters aditivo (ETS(A,A,A)). Em seguida, foram obtidos o resumo dos modelos ajustados, as respectivas medidas de acurácia, as previsões para os 12 meses subsequentes e realizado o diagnóstico dos resíduos.
+
+Por fim, procedeu-se à análise dos resíduos dos modelos selecionados utilizando a função `checkresiduals()` do pacote `forecast`, com o objetivo de verificar a adequação dos ajustes por meio da avaliação da autocorrelação residual e do comportamento aproximadamente aleatório dos resíduos.
+
+## Ferramentas Computacionais
+
+As análises foram realizadas na linguagem R (R Core Team). Foram empregados os pacotes `readr`, para importação e manipulação dos dados; `dplyr` e `fpp3`, para análise exploratória e visualização de séries temporais; e `forecast`, para ajuste dos modelos de suavização exponencial (ETS), geração de previsões e avaliação de desempenho.
+
+A manipulação de séries temporais foi realizada por meio das classes `ts` e `tsibble`, permitindo a aplicação de métodos específicos para dados indexados no tempo. A visualização dos resultados e diagnósticos foi feita por meio de gráficos gerados no próprio R, incluindo funções de decomposição, autocorrelação e análise de resíduos.
+
+# Resultados e Discussão
+
+Nesta seção são apresentados e discutidos os resultados obtidos para as duas séries temporais analisadas: o Índice de Volume de Vendas do Comércio Varejista e a Taxa de Desemprego. Inicialmente, são apresentadas as análises exploratórias, contemplando a visualização das séries, as estatísticas descritivas, a investigação da sazonalidade, a decomposição dos componentes, as funções de autocorrelação e autocorrelação parcial e a identificação de possíveis valores atípicos. Em seguida, são apresentados os resultados da modelagem por suavização exponencial (ETS), incluindo a comparação entre os modelos ajustados, as previsões obtidas e a análise dos resíduos dos modelos selecionados.
+
+## Índice de Volume de Vendas do Comércio Varejista
+
+### Visualização da Séria
+
+![Evolução mensal do Índice de Volume de Vendas do Comércio Varejista no Brasil.](series_1.png){#fig-comercio width="85%" fig-align="center"}
+
+A @fig-comercio apresenta a evolução mensal do Índice de Volume de Vendas do Comércio Varejista no Brasil entre janeiro de 2000 e março de 2026. Observa-se uma tendência crescente ao longo do período analisado, indicando expansão da atividade comercial no país. Entre os anos de 2000 e aproximadamente 2014, verifica-se um crescimento mais acentuado, seguido por um período de menor crescimento e maior oscilação entre 2015 e 2019.
+
+Também se observa um comportamento sazonal bem definido, evidenciado pela ocorrência de picos que se repetem anualmente, indicando aumento recorrente do índice em determinados meses do ano. Esse padrão sazonal permanece presente ao longo de praticamente toda a série.
+
+Em 2020, nota-se uma queda expressiva no índice, compatível com a retração da atividade econômica observada durante a pandemia do COVID-19. Nos anos subsequentes, verifica-se uma recuperação gradual da série, que retoma sua trajetória de crescimento, mantendo as oscilações sazonais características do indicador.
+
+### Análise Descritiva dos Dados
+
+A @tbl-desc-comercio apresenta as principais estatísticas descritivas do Índice de Volume de Vendas do Comércio Varejista.
+
+| **Estatística** | **Valor** |
+|:----------------|----------:|
+| Mínimo          |     43,32 |
+| 1º Quartil      |     60,04 |
+| Mediana         |     88,92 |
+| Média           |     81,78 |
+| 3º Quartil      |     97,52 |
+| Máximo          |    131,81 |
+| Desvio-padrão   |     22,29 |
+| Variância       |    496,85 |
+
+: Estatísticas descritivas. {#tbl-desc-comercio}
+
+Observa-se que o Índice de Volume de Vendas do Comércio Varejista apresentou média de 81,78 pontos e mediana de 88,92 pontos. Os valores variaram entre 43,32 e 131,81 pontos, evidenciando ampla variação do índice ao longo do período analisado. O desvio-padrão de 22,29 indica dispersão dos valores em torno da média, enquanto os quartis mostram que 50% das observações estão compreendidas entre 60,04 e 97,52 pontos.
+
+### Análise de Sazonalidade
+
+![Gráfico sazonal.](sazonalidade_1.png){#fig-sazonalidade-comercio width="90%" fig-align="center"}
+
+Observa-se na @fig-sazonalidade-comercio que a série apresenta um padrão sazonal bem definido, caracterizado pela repetição de comportamentos semelhantes ao longo dos meses em diferentes anos. Em praticamente todo o período analisado, os menores valores do índice concentram-se nos primeiros meses do ano, enquanto os maiores valores são registrados em dezembro.
+
+Esse comportamento evidencia um aumento recorrente da atividade comercial no final de cada ano, associado ao maior consumo durante as festividades de fim de ano e ao pagamento do décimo terceiro salário. Após esse pico, verifica-se uma redução do índice nos meses iniciais do ano seguinte, indicando a recorrência desse ciclo sazonal ao longo da série.
+
+Além da sazonalidade, observa-se um deslocamento gradual das curvas para níveis mais elevados ao longo dos anos, refletindo a tendência de crescimento do Índice de Volume de Vendas do Comércio Varejista durante o período analisado.
+
+![Gráfico de subséries sazonais.](sub_series_1.png){#fig-subseries-comercio width="90%" fig-align="center"}
+
+O @fig-subseries-comercio confirma a existência de um padrão sazonal consistente ao longo do período analisado. Observa-se que os meses apresentam comportamentos relativamente semelhantes entre os diferentes anos, evidenciando a repetição do ciclo sazonal da série.
+
+As linhas azuis, que representam a média de cada mês, indicam que os menores valores do índice concentram-se principalmente em fevereiro, enquanto os maiores valores ocorrem em dezembro. Esse comportamento reforça a intensificação da atividade comercial no final do ano, período tradicionalmente impulsionado pelas compras de Natal e pelo pagamento do décimo terceiro salário.
+
+Além disso, verifica-se que, ao longo dos anos, os valores observados em praticamente todos os meses tornam-se progressivamente mais elevados, indicando que, além da sazonalidade, a série apresenta uma tendência de crescimento no período analisado.
+
+### Decomposição da Série
+
+![Decomposição multiplicativa da série temporal.](decomposicao_1.png){#fig-decomposicao-comercio width="90%" fig-align="center"}
+
+A @fig-decomposicao-comercio apresenta a decomposição multiplicativa da série temporal em seus componentes de tendência, sazonalidade e componente aleatório. Observa-se uma tendência crescente ao longo da maior parte do período analisado, com crescimento mais intenso até aproximadamente 2014, seguida de uma leve desaceleração e posterior retomada da trajetória de crescimento. O componente sazonal revela um padrão periódico bem definido e recorrente, indicando a presença de sazonalidade consistente entre os meses do ano. Por sua vez, o componente aleatório concentra oscilações em torno do comportamento esperado, embora apresente algumas variações mais acentuadas em determinados períodos, especialmente por volta de 2020, sem descaracterizar a estrutura geral da série.
+
+### ACF e PACF
+
+::: {#fig-acf-pacf-comercio layout-ncol="2" fig-cap="Funções de autocorrelação (ACF) e autocorrelação parcial (PACF) da série temporal."}
+![Função de autocorrelação (ACF).](acf_1.png)
+
+![Função de autocorrelação parcial (PACF).](pacf_1.png)
+:::
+
+As @fig-acf-pacf-comercio apresentam as funções de autocorrelação (ACF) e autocorrelação parcial (PACF) da série do Índice de Volume de Vendas do Comércio Varejista. Na ACF, observa-se que as autocorrelações permanecem positivas e estatisticamente significativas em diversas defasagens, apresentando um decaimento gradual. Esse comportamento indica forte dependência temporal entre as observações e sugere a presença de tendência na série. Além disso, verifica-se um aumento da autocorrelação na defasagem correspondente a aproximadamente 12 meses, evidenciando um padrão sazonal anual.
+
+Na PACF, destaca-se um coeficiente elevado na primeira defasagem, seguido por autocorrelações parciais de menor magnitude nas defasagens subsequentes, embora algumas ainda permaneçam estatisticamente significativas, especialmente em torno da defasagem sazonal. Em conjunto, os resultados da ACF e da PACF confirmam que a série apresenta forte persistência temporal e sazonalidade, características que justificam a utilização de modelos de suavização exponencial com componente sazonal na etapa de modelagem.
+
+### Identificação de Outliers via STL
+
+::: {#fig-hist-box-comercio layout-ncol="2" fig-cap="Histograma e boxplot da série do Índice de Volume de Vendas do Comércio Varejista."}
+![Histograma da série.](histograma_1.png)
+
+![Boxplot da série.](boxplot_1.png)
+:::
+
+A @fig-hist-box-comercio apresenta o histograma e o boxplot da série do Índice de Volume de Vendas do Comércio Varejista. O histograma evidencia maior concentração de observações entre aproximadamente 80 e 100 pontos do número-índice, indicando que essa faixa representa os valores mais frequentes da série. Observa-se ainda uma dispersão moderada dos dados e uma leve assimetria à direita, decorrente da presença de alguns valores mais elevados registrados nos anos mais recentes.
+
+O boxplot complementa essa análise ao mostrar que a mediana se encontra próxima do centro da distribuição e que os valores apresentam amplitude relativamente elevada, refletindo a evolução do índice ao longo do período analisado. Além disso, não são observados valores discrepantes (outliers), sugerindo que as variações da série ocorreram de forma consistente, sem a presença de observações extremas isoladas.
+
+![Identificação de outliers via decomposição STL da série temporal.](stl_1.png){#fig-stl-outliers-comercio width="90%" fig-align="center"}
+
+A @fig-stl-outliers-comercio apresenta a decomposição STL da série do Índice de Volume de Vendas do Comércio Varejista em seus componentes de tendência, sazonalidade e resíduos. Observa-se que a tendência apresenta crescimento gradual entre os anos de 2004 e 2014, seguido por uma redução no período de 2015 a 2017 e posterior retomada do crescimento até o final da série. O componente sazonal evidencia um padrão anual bem definido e estável, indicando que o comportamento sazonal se repete de forma consistente ao longo do período analisado.
+
+No componente dos resíduos, verifica-se que a maior parte das observações permanece próxima de zero, indicando que a decomposição conseguiu representar adequadamente os principais padrões da série. Entretanto, destacam-se alguns resíduos de maior magnitude, principalmente entre os anos de 2020 e 2021, caracterizando observações atípicas (outliers). Esse comportamento coincide com o período da pandemia de COVID-19, quando as medidas de isolamento social, as restrições ao funcionamento do comércio e as mudanças nos padrões de consumo provocaram oscilações expressivas na atividade varejista brasileira. Após esse período, observa-se que os resíduos retornam a um comportamento mais estável, sugerindo que os impactos desse evento foram predominantemente temporários.
+
+### Comparação dos Modelos ETS
+
+Com o objetivo de selecionar o modelo de melhor desempenho para cada série temporal, foram comparados cinco modelos de suavização exponencial: Suavização Exponencial Simples (SES), Holt, Holt com tendência amortecida, Holt-Winters aditivo e Holt-Winters multiplicativo. A comparação foi realizada com base nas medidas de acurácia obtidas no conjunto de teste, utilizando como principal critério de seleção o menor valor do erro percentual absoluto médio (MAPE).
+
+A @tbl-comparacao-comercio apresenta as medidas de acurácia dos modelos ETS para o Índice de Volume de Vendas do Comércio Varejista.
+
+| **Modelo**                            |  **RMSE** |   **MAE** | **MAPE (%)** |
+|:--------------------------------------|----------:|----------:|-------------:|
+| SES                                   |     8,041 |     5,100 |        4,468 |
+| Holt                                  |     7,679 |     5,369 |        4,845 |
+| Holt amortecido                       |     7,679 |     5,369 |        4,845 |
+| Holt-Winters aditivo (AAA)            |     2,873 |     2,569 |        2,366 |
+| **Holt-Winters multiplicativo (MAM)** | **2,068** | **1,516** |    **1,392** |
+
+: Medidas de acurácia dos modelos ETS para o Índice de Volume de Vendas do Comércio Varejista. {#tbl-comparacao-comercio}
+
+A @tbl-comparacao-comercio apresenta as medidas de acurácia dos cinco modelos de suavização exponencial ajustados para a série do Índice de Volume de Vendas do Comércio Varejista. Observa-se que os modelos Holt-Winters apresentaram desempenho superior aos modelos SES, Holt e Holt com tendência amortecida, evidenciado pelos menores valores das métricas de erro.
+
+O modelo Holt-Winters multiplicativo (MAM) apresentou o melhor desempenho preditivo, registrando os menores valores de RMSE (2,068), MAE (1,516) e MAPE (1,392%). Como o critério adotado para a seleção do modelo foi o menor valor de MAPE, esse modelo foi escolhido para representar a série e realizar as previsões dos períodos subsequentes.
+
+![Validação do modelo Holt-Winters multiplicativo para o Índice de Volume de Vendas do Comércio Varejista.](validaçao_1.png){#fig-validacao-ets-comercio width="90%" fig-align="center"}
+
+A @fig-validacao-ets-comercio apresenta o desempenho do modelo Holt-Winters multiplicativo no período reservado para validação. Observa-se que as previsões acompanharam de forma satisfatória os valores observados, reproduzindo adequadamente tanto a tendência de crescimento quanto o padrão sazonal característico da série. Além disso, os valores observados permaneceram, em sua maior parte, dentro dos intervalos de previsão, evidenciando a boa capacidade preditiva do modelo. Esse resultado é consistente com as medidas de acurácia obtidas na etapa de validação, nas quais o modelo apresentou o menor valor de MAPE (1,39%), justificando sua seleção para o ajuste final e para a geração das previsões.
+
+### Previsões
+
+Após a seleção e o ajuste final do modelo Holt-Winters multiplicativo utilizando toda a série histórica, foram geradas previsões para os 12 meses subsequentes. A Figura @fig-previsao-ets-comercio apresenta as projeções obtidas pelo modelo, bem como os respectivos intervalos de previsão, permitindo avaliar o comportamento esperado do Índice de Volume de Vendas do Comércio Varejista no horizonte considerado.
+
+![Previsão do modelo Holt-Winters multiplicativo para o Índice de Volume de Vendas do Comércio Varejista.](previsao_1.png){#fig-previsao-ets-comercio width="90%" fig-align="center"}
+
+Observa-se, na Figura @fig-previsao-ets-comercio, que o modelo Holt-Winters multiplicativo reproduziu satisfatoriamente o comportamento histórico do Índice de Volume de Vendas do Comércio Varejista. As previsões preservam o padrão sazonal da série, evidenciando oscilações periódicas semelhantes às observadas ao longo do período analisado.
+
+Além disso, verifica-se a manutenção da trajetória recente da série, sem alterações abruptas no comportamento do indicador. Os intervalos de previsão tornam-se gradativamente mais amplos à medida que o horizonte de previsão aumenta, refletindo o crescimento da incerteza inerente às estimativas para períodos mais distantes. De modo geral, os resultados indicam que o modelo foi capaz de representar adequadamente a estrutura temporal da série, fornecendo previsões consistentes com o comportamento observado nos dados históricos.
+
+### Diagnóstico dos Resíduos
+
+Após o ajuste do modelo Holt-Winters multiplicativo, realizou-se o diagnóstico dos resíduos com o objetivo de verificar se o modelo descreve adequadamente a estrutura da série temporal. Para essa avaliação foram analisados os resíduos por meio de gráficos, da função de autocorrelação (ACF) e do teste de Ljung-Box, que permite verificar a existência de autocorrelação residual. A Figura @fig-residuos-comercio apresenta os resultados obtidos.
+
+![Diagnóstico dos resíduos do modelo Holt-Winters multiplicativo ajustado à série do Índice de Volume de Vendas do Comércio Varejista.](residu_1.png){#fig-residuos-comercio width="90%" fig-align="center"}
+
+A Figura @fig-residuos-comercio apresenta o diagnóstico dos resíduos do modelo ajustado. Observa-se que os resíduos estão centrados em torno de zero ao longo do tempo, sem a presença de padrões sistemáticos evidentes, indicando que o modelo captura de forma satisfatória a estrutura principal da série. Entretanto, a análise da função de autocorrelação (ACF) sugere a presença de algumas autocorrelações significativas em defasagens específicas, o que indica possível dependência residual não totalmente explicada pelo modelo.
+
+Para complementar a análise gráfica, foi aplicado o teste de Ljung-Box aos resíduos, cujo resultado é apresentado na Tabela @tbl-ljung-box.
+
+A Tabela @tbl-ljung-box apresenta o teste de Ljung-Box aplicado aos resíduos do modelo ETS(M,Ad,M).
+
+| **Estatística**       | **Valor** |
+|:----------------------|----------:|
+| Estatística $Q^*$     |    46.134 |
+| Graus de liberdade    |        24 |
+| Valor-p               |  0.004266 |
+| Defasagens utilizadas |        24 |
+| Modelo df             |         0 |
+
+: Teste de Ljung-Box aplicado aos resíduos do modelo ETS(M,Ad,M). {#tbl-ljung-box}
+
+O valor-p obtido (0,004266) é inferior ao nível de significância de 5%, o que leva à rejeição da hipótese nula de ausência de autocorrelação nos resíduos. Dessa forma, há evidências estatisticamente significativas de autocorrelação residual, indicando que o modelo Holt-Winters ajustado ainda não captura completamente toda a estrutura de dependência temporal da série.
+
+## Taxa de Desemprego
+
+### Visualização da Série
+
+A Figura @fig-desemprego-serie apresenta a evolução mensal da Taxa de Desemprego no Brasil ao longo do período analisado. A inspeção visual da série constitui a primeira etapa da análise exploratória, permitindo identificar possíveis padrões de tendência, sazonalidade, variações ao longo do tempo e eventuais mudanças no comportamento da série.
+
+![Evolução mensal da Taxa de Desemprego no Brasil.](series_2.png){#fig-desemprego-serie width="85%" fig-align="center"}
+
+Observa-se, na Figura @fig-desemprego-serie, que a Taxa de Desemprego apresentou comportamentos distintos ao longo do período analisado. Entre 2012 e 2014, a série permaneceu relativamente estável, com pequenas oscilações em torno de seus valores médios. A partir de 2015, verifica-se um crescimento gradual da taxa, atingindo níveis elevados entre 2016 e 2017. Posteriormente, observa-se uma nova elevação entre 2020 e 2021, período em que a série alcança seus maiores valores. Esse aumento coincide com os impactos econômicos provocados pela pandemia de COVID-19, quando a redução da atividade econômica e das oportunidades de emprego contribuiu para a elevação da taxa de desemprego no país (IBGE, 2022).
+
+Após esse intervalo, a taxa passa a apresentar uma trajetória de redução contínua, evidenciando uma melhora gradual nas condições do mercado de trabalho ao longo dos anos seguintes. No final da série, os valores observados encontram-se entre os menores registrados durante todo o período analisado. De maneira geral, a Figura @fig-desemprego-serie evidencia que a série apresenta uma tendência bem definida, marcada por períodos sucessivos de crescimento e redução da taxa de desemprego ao longo do tempo. Além disso, observam-se oscilações que se repetem entre os anos, sugerindo a existência de um componente sazonal, embora menos pronunciado quando comparado ao observado para o Índice de Volume de Vendas do Comércio Varejista. Essa característica será investigada com maior detalhe por meio das análises de sazonalidade e decomposição apresentadas nas próximas subseções.
+
+### Análise Descritiva dos Dados
+
+A Tabela @tbl-desc-desemprego apresenta as principais estatísticas descritivas da Taxa de Desemprego.
+
+| **Estatística** | **Valor** |
+|:----------------|----------:|
+| Mínimo          |      5,10 |
+| 1º Quartil      |      7,13 |
+| Mediana         |      8,80 |
+| Média           |      9,64 |
+| 3º Quartil      |     12,10 |
+| Máximo          |     14,90 |
+| Desvio-padrão   |      2,82 |
+| Variância       |      7,93 |
+
+: Estatísticas descritivas da Taxa de Desemprego. {#tbl-desc-desemprego}
+
+Conforme apresentado na Tabela @tbl-desc-desemprego, a Taxa de Desemprego apresentou média de 9,64% e mediana de 8,80%. Os valores variaram entre 5,10% e 14,90%, evidenciando oscilações expressivas ao longo do período analisado. O desvio-padrão de 2,82 pontos percentuais indica variabilidade moderada da série, enquanto os quartis mostram que 50% das observações concentraram-se entre 7,13% e 12,10%. A diferença entre a média e a mediana, bem como a amplitude observada, sugere a ocorrência de períodos com taxas de desemprego mais elevadas, influenciando o comportamento geral da série.
+
+### Análise de Sazonalidade
+
+![Gráfico sazonal da Taxa de Desemprego no Brasil.](sazonalidade_2.png){#fig-sazonalidade-desemprego width="90%" fig-align="center"}
+
+Observa-se, na Figura @fig-sazonalidade-desemprego, que a Taxa de Desemprego apresenta um padrão sazonal menos pronunciado quando comparado ao observado para o Índice de Volume de Vendas do Comércio Varejista. Embora as curvas dos diferentes anos apresentem comportamento semelhante ao longo dos meses, as diferenças entre os anos são mais evidentes do que as variações sazonais entre os meses.
+
+De modo geral, verifica-se uma tendência de elevação da Taxa de Desemprego nos primeiros meses do ano, especialmente entre fevereiro e março, seguida por redução gradual ao longo dos meses subsequentes. Contudo, esse padrão não é observado de maneira consistente em toda a série, indicando que o componente sazonal possui menor intensidade quando comparado às variações de longo prazo.
+
+Além disso, observa-se a influência de eventos econômicos sobre a série, destacando-se os anos de 2020 e 2021, que apresentaram níveis mais elevados de desemprego ao longo de praticamente todos os meses, refletindo os impactos da pandemia de COVID-19 sobre o mercado de trabalho brasileiro. Nos anos posteriores, verifica-se redução gradual da taxa, indicando um processo de recuperação das condições de emprego.
+
+![Gráfico de subséries sazonais da Taxa de Desemprego no Brasil.](subserie_2.png){#fig-subseries-desemprego width="90%" fig-align="center"}
+
+Observa-se, na Figura @fig-subseries-desemprego, que a evolução da Taxa de Desemprego dentro de cada mês apresenta comportamento semelhante ao longo dos anos, evidenciando a existência de um componente sazonal. As linhas azuis, que representam a média de cada mês ao longo da série, indicam pequenas diferenças entre os meses do ano, reforçando que a sazonalidade é menos intensa quando comparada à observada na série do comércio varejista.
+
+Nota-se ainda que as maiores taxas concentram-se principalmente entre os anos de 2020 e 2021 em praticamente todos os meses, enquanto os menores valores são observados nos anos mais recentes da série. Esse comportamento evidencia que as variações de longo prazo exercem influência mais significativa sobre a dinâmica da série do que as oscilações sazonais propriamente ditas.
+
+Assim, a Figura @fig-subseries-desemprego confirma que a Taxa de Desemprego apresenta um componente sazonal relativamente discreto, sendo sua evolução ao longo do período analisado fortemente influenciada por mudanças nas condições econômicas observadas entre os diferentes anos.
+
+### Decomposição da Série
+
+![Decomposição aditiva da série temporal da Taxa de Desemprego no Brasil.](decomposiçao_2.png){#fig-decomposicao-desemprego width="90%" fig-align="center"}
+
+Observa-se, na Figura @fig-decomposicao-desemprego, que a decomposição aditiva permitiu separar a série da Taxa de Desemprego em seus componentes de tendência, sazonalidade e componente aleatória, facilitando a análise individual de cada um desses elementos.
+
+O componente de tendência evidencia a evolução de longo prazo da série, destacando os períodos de crescimento, estabilização e posterior redução da taxa de desemprego observados ao longo do intervalo analisado.
+
+O componente sazonal apresenta oscilações que se repetem regularmente ao longo dos anos, com amplitude aproximadamente constante, característica compatível com a utilização de um modelo de decomposição aditiva. Esse comportamento confirma a existência de sazonalidade na série, embora menos intensa quando comparada à observada para o Índice de Volume de Vendas do Comércio Varejista.
+
+Por fim, o componente aleatório representa as variações não explicadas pelos componentes de tendência e sazonalidade. Observa-se que os resíduos permanecem, em sua maior parte, próximos de zero, indicando que a decomposição foi capaz de representar adequadamente a estrutura temporal da série.
+
+### ACF e PACF
+
+::: {#fig-acf-pacf-desemprego layout-ncol="2" fig-cap="Funções de autocorrelação (ACF) e autocorrelação parcial (PACF) da Taxa de Desemprego no Brasil."}
+![Função de autocorrelação (ACF).](acf_2.png)
+
+![Função de autocorrelação parcial (PACF).](pacf_2.png)
+:::
+
+Observa-se, na Figura @fig-acf-pacf-desemprego, que a função de autocorrelação (ACF) apresenta valores positivos elevados nas primeiras defasagens, com decaimento gradual à medida que a defasagem aumenta. Esse comportamento indica forte dependência temporal entre as observações consecutivas, evidenciando que os valores da Taxa de Desemprego permanecem correlacionados ao longo do tempo.
+
+Em relação à função de autocorrelação parcial (PACF), observa-se um coeficiente elevado apenas na primeira defasagem, seguido por coeficientes de menor magnitude, em sua maioria dentro ou próximos dos limites de significância. Esse resultado sugere que grande parte da dependência temporal da série é explicada pelas primeiras defasagens, enquanto as defasagens posteriores apresentam contribuição relativamente reduzida.
+
+Em conjunto, os gráficos de ACF e PACF evidenciam que a série apresenta estrutura de dependência temporal, justificando a utilização de métodos específicos para séries temporais, como os modelos de suavização exponencial empregados neste estudo.
+
+### Identificação de Outliers via STL
+
+::: {#fig-hist-box-desemprego layout-ncol="2" fig-cap="Histograma e boxplot da Taxa de Desemprego no Brasil."}
+![Histograma da Taxa de Desemprego.](histograma_2.png)
+
+![Boxplot da Taxa de Desemprego.](boxplot_2.png)
+:::
+
+Observa-se, na Figura @fig-hist-box-desemprego, que a distribuição da Taxa de Desemprego apresenta concentração de observações principalmente entre aproximadamente 7% e 13%, abrangendo a maior parte dos valores registrados ao longo da série. O histograma evidencia maior frequência de observações nesses intervalos, enquanto valores próximos aos extremos ocorrem com menor frequência.
+
+O boxplot complementa essa análise ao mostrar que 50% das observações estão compreendidas entre o primeiro e o terceiro quartis, com mediana próxima ao centro da caixa. Além disso, não são observados valores discrepantes pelo critério gráfico do boxplot, indicando ausência de outliers evidentes nessa representação.
+
+Em conjunto, o histograma e o boxplot fornecem uma visão geral da distribuição da série e sugerem que a variabilidade observada decorre principalmente da própria dinâmica temporal da Taxa de Desemprego, sem a presença de observações isoladas de grande magnitude.
+
+![Identificação de outliers via decomposição STL da Taxa de Desemprego no Brasil.](stl_2.png){#fig-stl-outliers-desemprego width="90%" fig-align="center"}
+
+Observa-se, na Figura @fig-stl-outliers-desemprego, que a decomposição STL permitiu separar a série em seus componentes de tendência, sazonalidade e resíduos, possibilitando a identificação de valores atípicos por meio da componente residual.
+
+Verifica-se que os resíduos permanecem próximos de zero durante a maior parte do período analisado, indicando que os componentes de tendência e sazonalidade explicam adequadamente a maior parte da variabilidade da série. Entretanto, foram identificados alguns resíduos classificados como outliers pelo critério do intervalo interquartil (IQR), indicando a ocorrência de observações atípicas na série, com maior concentração visual no período em torno de 2020 e 2021.
+
+Nos demais períodos, os resíduos apresentam menor magnitude, indicando maior estabilidade em torno do padrão temporal estimado pela decomposição STL.
+
+### Comparação dos Modelos ETS
+
+Nesta etapa, foram avaliadas diferentes especificações de modelos de suavização exponencial com o objetivo de identificar aquela com melhor capacidade preditiva para a Taxa de Desemprego. A comparação foi realizada utilizando o conjunto de teste, reservado para os 12 meses finais da série, e considerando como critério principal o menor valor do erro percentual absoluto médio (MAPE).
+
+A Tabela @tbl-comparacao-desemprego apresenta as medidas de acurácia dos modelos ETS para a Taxa de Desemprego.
+
+| **Modelo**                        |  **RMSE** |   **MAE** | **MAPE (%)** |
+|:----------------------------------|----------:|----------:|-------------:|
+| SES                               |     1,017 |     0,967 |       17,532 |
+| Holt                              |     0,383 |     0,285 |        4,965 |
+| Holt amortecido                   |     0,383 |     0,285 |        4,965 |
+| **Holt-Winters aditivo (AAA)**    | **0,239** | **0,212** |    **3,741** |
+| Holt-Winters multiplicativo (MAM) |     0,412 |     0,369 |        6,696 |
+
+: Medidas de acurácia dos modelos ETS para a Taxa de Desemprego. {#tbl-comparacao-desemprego}
+
+A Tabela @tbl-comparacao-desemprego apresenta as medidas de acurácia dos modelos ETS ajustados para a Taxa de Desemprego. Observa-se que os modelos Holt, Holt amortecido e Holt-Winters apresentaram desempenho superior ao modelo de Suavização Exponencial Simples (SES), evidenciado pelos menores valores das métricas de erro.
+
+Entre os modelos avaliados, o Holt-Winters aditivo (AAA) apresentou o melhor desempenho, registrando os menores valores de RMSE (0,239), MAE (0,212) e MAPE (3,741%). Como o critério adotado para a seleção do modelo foi o menor valor de MAPE, esse modelo foi selecionado para representar a série da Taxa de Desemprego e realizar as previsões dos períodos subsequentes.
+
+![Validação do modelo Holt-Winters aditivo para a Taxa de Desemprego no Brasil.](avaliação_2.png){#fig-validacao-ets-desemprego width="90%" fig-align="center"}
+
+A Figura @fig-validacao-ets-desemprego apresenta o desempenho do modelo Holt-Winters aditivo no período reservado para validação. Observa-se que as previsões acompanharam satisfatoriamente o comportamento da Taxa de Desemprego ao longo do conjunto de teste, reproduzindo a tendência de redução observada ao final da série.
+
+Verifica-se ainda que os valores observados permaneceram próximos das previsões e, em sua maior parte, contidos nos respectivos intervalos de previsão, indicando boa capacidade preditiva do modelo. Embora pequenas diferenças entre os valores previstos e observados sejam esperadas, elas permaneceram reduzidas, evidenciando um ajuste adequado.
+
+Esse resultado é consistente com as medidas de acurácia apresentadas na Tabela @tbl-comparacao-desemprego, na qual o modelo Holt-Winters aditivo apresentou o menor valor de MAPE (3,741%), justificando sua seleção para o ajuste final e para a geração das previsões da Taxa de Desemprego.
+
+### Previsões
+
+Após a definição do modelo Holt-Winters aditivo como o mais adequado para representar a Taxa de Desemprego, realizou-se o ajuste final utilizando toda a série histórica disponível. Com base nesse modelo, foram obtidas previsões para os 12 meses subsequentes, acompanhadas de seus respectivos intervalos de previsão. A Figura @fig-previsao-ets-desemprego apresenta as projeções geradas pelo modelo para o horizonte de previsão considerado.
+
+![Previsão do modelo Holt-Winters aditivo para a Taxa de Desemprego no Brasil.](previsao_2.png){#fig-previsao-ets-desemprego width="90%" fig-align="center"}
+
+Observa-se, na Figura @fig-previsao-ets-desemprego, que o modelo Holt-Winters aditivo projeta a continuidade da tendência de baixa da Taxa de Desemprego observada ao final da série histórica, seguida por pequenas oscilações sazonais ao longo do horizonte de previsão. As estimativas indicam que a taxa deverá permanecer em níveis relativamente baixos quando comparada aos anos anteriores.
+
+As previsões pontuais variam de aproximadamente 4,46% a 5,55% entre maio de 2026 e abril de 2027. O menor valor previsto ocorre em dezembro de 2026 (4,46%), enquanto os maiores valores são projetados para maio de 2026 (5,55%) e março de 2027 (5,52%), evidenciando oscilações de pequena magnitude ao longo do período previsto.
+
+Os intervalos de previsão tornam-se gradualmente mais amplos à medida que o horizonte de previsão aumenta, refletindo o crescimento natural da incerteza associada às estimativas futuras. Ainda assim, observa-se que as previsões permanecem compatíveis com o comportamento recente da série, indicando que o modelo ajustado representa adequadamente sua dinâmica temporal e fornece projeções consistentes para os meses subsequentes.
+
+### Diagnóstico dos Resíduos
+
+Após o ajuste do modelo Holt-Winters aditivo, realizou-se o diagnóstico dos resíduos com o objetivo de verificar se o modelo representa adequadamente a estrutura da série temporal da Taxa de Desemprego. Para essa avaliação, foram analisados os resíduos por meio de gráficos, da função de autocorrelação (ACF) e do teste de Ljung-Box, utilizado para verificar a existência de autocorrelação residual. A Figura @fig-residuos-desemprego apresenta os resultados obtidos.
+
+![Diagnóstico dos resíduos do modelo Holt-Winters aditivo ajustado à série da Taxa de Desemprego no Brasil.](residuo_2.png){#fig-residuos-desemprego width="90%" fig-align="center"}
+
+A Figura @fig-residuos-desemprego apresenta o diagnóstico dos resíduos do modelo ajustado. Observa-se que os resíduos permanecem distribuídos em torno de zero durante grande parte do período analisado, indicando que o modelo descreve adequadamente a tendência e a sazonalidade da série. Entretanto, nota-se maior variabilidade entre os anos de 2020 e 2021, refletindo as oscilações excepcionais observadas nesse período.
+
+A análise da função de autocorrelação (ACF) evidencia a presença de autocorrelações significativas em algumas defasagens, indicando que parte da dependência temporal permanece presente nos resíduos. Além disso, o histograma mostra distribuição aproximadamente simétrica em torno de zero, embora com pequenas diferenças em relação ao comportamento esperado sob normalidade.
+
+Para complementar a análise gráfica, foi aplicado o teste de Ljung-Box aos resíduos, cujo resultado é apresentado na Tabela @tbl-ljung-box-desemprego.
+
+A Tabela @tbl-ljung-box-desemprego apresenta o teste de Ljung-Box aplicado aos resíduos do modelo ETS(A,Ad,A).
+
+| **Estatística**       |               **Valor** |
+|:----------------------|------------------------:|
+| Estatística $Q^*$     |                  162.54 |
+| Graus de liberdade    |                      24 |
+| Valor-p               | $< 2.2 \times 10^{-16}$ |
+| Defasagens utilizadas |                      24 |
+| Modelo df             |                       0 |
+
+: Teste de Ljung-Box aplicado aos resíduos do modelo ETS(A,Ad,A). {#tbl-ljung-box-desemprego}
+
+O teste de Ljung-Box apresentou valor-p inferior a 0,05 ($p < 2,2 \times 10^{-16}$), levando à rejeição da hipótese nula de ausência de autocorrelação nos resíduos. Dessa forma, há evidências estatisticamente significativas de dependência temporal residual, indicando que o modelo Holt-Winters aditivo, embora apresente bom desempenho preditivo, não capturou completamente toda a estrutura de autocorrelação da série da Taxa de Desemprego.
+
+# Conclusões
+
+O presente trabalho teve como objetivo analisar o comportamento temporal do Índice de Volume de Vendas do Comércio Varejista e da Taxa de Desemprego no Brasil por meio de técnicas de análise exploratória e de modelagem utilizando modelos de suavização exponencial (ETS). A utilização dessas abordagens possibilitou identificar padrões de tendência, sazonalidade e variabilidade das séries, bem como selecionar modelos capazes de realizar previsões para períodos futuros.
+
+A análise exploratória evidenciou diferenças importantes entre as duas séries estudadas. O Índice de Volume de Vendas do Comércio Varejista apresentou tendência de crescimento ao longo do período analisado e um componente sazonal bem definido, caracterizado pela repetição de picos anuais, especialmente no mês de dezembro. Em contrapartida, a Taxa de Desemprego apresentou sazonalidade menos intensa, sendo seu comportamento fortemente influenciado por mudanças nas condições econômicas ao longo do tempo, com destaque para o aumento observado durante a pandemia de COVID-19 e a posterior redução da taxa nos anos mais recentes.
+
+Na etapa de modelagem, a comparação entre diferentes especificações dos modelos ETS demonstrou que o modelo Holt-Winters multiplicativo apresentou o melhor desempenho para representar a série do comércio varejista, enquanto o modelo Holt-Winters aditivo mostrou-se mais adequado para a série da Taxa de Desemprego, considerando o critério de menor erro percentual absoluto médio (MAPE). Os resultados obtidos na etapa de validação indicaram boa capacidade preditiva para ambas as séries, evidenciando que os modelos selecionados reproduziram satisfatoriamente os principais padrões observados nos dados históricos.
+
+As previsões geradas apontam para a continuidade do comportamento recente das séries no horizonte analisado. Para o Índice de Volume de Vendas do Comércio Varejista, as projeções preservam a tendência de crescimento e o padrão sazonal característico da atividade comercial. Para a Taxa de Desemprego, as estimativas indicam manutenção de níveis relativamente baixos, acompanhadas por oscilações sazonais de pequena magnitude.
+
+A análise dos resíduos mostrou que os modelos ajustados foram capazes de representar adequadamente a maior parte da estrutura temporal das séries. Entretanto, o teste de Ljung-Box indicou a presença de autocorrelação residual em ambos os casos, sugerindo que ainda existe parte da dependência temporal não capturada pelos modelos selecionados. Embora essa característica não invalide as previsões obtidas, ela evidencia a possibilidade de utilização de modelos mais sofisticados em estudos futuros.
+
+Por fim, conclui-se que os modelos de suavização exponencial constituem ferramentas eficientes para a análise e previsão das séries econômicas estudadas, permitindo compreender seu comportamento ao longo do tempo e produzir projeções consistentes. Os resultados obtidos demonstram a importância da análise de séries temporais como instrumento de apoio ao acompanhamento de indicadores econômicos e ao processo de tomada de decisão.
+
+No caso do Índice de Volume de Vendas do Comércio Varejista, as previsões podem subsidiar o planejamento de estoques, campanhas promocionais e estratégias comerciais de curto prazo. Para a Taxa de Desemprego, as projeções podem contribuir para o acompanhamento da dinâmica do mercado de trabalho, fornecendo subsídios para análises econômicas e para o planejamento de políticas públicas voltadas ao emprego. Dessa forma, os resultados obtidos evidenciam o potencial da análise de séries temporais como ferramenta de apoio à tomada de decisão em diferentes contextos econômicos, além de fornecerem base para pesquisas futuras envolvendo métodos de modelagem mais complexos e horizontes de previsão mais amplos.
+
+# Agradecimento
+
+Agradeço ao professor da disciplina de Análise de Séries Temporais pelos ensinamentos e orientações durante o desenvolvimento deste trabalho, bem como à Universidade Estadual da Paraíba (UEPB).
+
+# Referências
+
+BROCKWELL, P. J.; DAVIS, R. A.\
+*Introduction to Time Series and Forecasting*. 3. ed. New York: Springer, 2016.
+
+CHATFIELD, C.\
+*The Analysis of Time Series: An Introduction*. 6. ed. Boca Raton: CRC Press, 2016.
+
+CRYER, J. D.; CHAN, K.-S.\
+*Time Series Analysis: With Applications in R*. 2. ed. New York: Springer, 2008.
+
+HYNDMAN, R. J.; ATHANASOPOULOS, G.\
+*Forecasting: Principles and Practice*. 3. ed. Melbourne: OTexts, 2021.\
+Disponível em: <https://otexts.com/fpp3/>.\
+Acesso em: 27 jun. 2026.
+
+INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA (IBGE).\
+*Desemprego recua na maioria dos estados na média anual para 2021*. Rio de Janeiro: IBGE, 2022.\
+Disponível em: <https://agenciadenoticias.ibge.gov.br/agencia-noticias/2012-agencia-de-noticias/noticias/33034-desemprego-recua-na-maioria-dos-estados-na-media-anual-para-2021>.\
+Acesso em: 27 jun. 2026.
+
+INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA (IBGE).\
+*Sistema IBGE de Recuperação Automática (SIDRA)*. Rio de Janeiro, 2024.\
+Disponível em: <https://sidra.ibge.gov.br/>.\
+Acesso em: 27 jun. 2026.
+
+INSTITUTO DE PESQUISA ECONÔMICA APLICADA (IPEA).\
+*IPEADATA*. Brasília, 2024.\
+Disponível em: <http://www.ipeadata.gov.br/>.\
+Acesso em: 27 jun. 2026.
+
+MONTGOMERY, D. C.; JENNINGS, C. L.; KULAHCI, M.\
+*Introduction to Time Series Analysis and Forecasting*. 2. ed. Hoboken: John Wiley & Sons, 2015.
+
+SHUMWAY, R. H.; STOFFER, D. S.\
+*Time Series Analysis and Its Applications: With R Examples*. 4. ed. New York: Springer, 2017.

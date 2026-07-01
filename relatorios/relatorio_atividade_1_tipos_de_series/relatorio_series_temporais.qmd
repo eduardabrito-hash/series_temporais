@@ -1,0 +1,249 @@
+---
+title: ""
+author: ""
+
+format:
+  pdf:
+    include-before-body: capa.tex
+
+editor: visual
+
+execute:
+  warning: true
+  message: true
+---
+
+```{=html}
+<style>
+body {
+  text-align: justify;
+}
+
+p {
+  text-align: justify;
+}
+</style>
+```
+
+::: {style="text-align:center; margin-top:40px;"}
+<h2><b>RELATÓRIO SOBRE OS TIPOS DE SÉRIES TEMPORAIS COM TENDÊNCIA E SAZONALIDADE</b></h2>
+
+<h4>Disciplina de Séries Temporais</h4>
+
+<br><br>
+
+<b>Discente:</b> Eduarda da Silva Brito<br> <b>Docente:</b> Pedro Monteiro de Almeida Júnior<br> <b>Curso:</b> Bacharelado em Estatística – UEPB
+:::
+
+<br><br>
+
+# Introdução
+
+As séries temporais são conjuntos de observações registradas sequencialmente ao longo do tempo, em intervalos regulares, como dias, meses ou anos. Elas permitem analisar a evolução de uma variável, identificando padrões de comportamento e fornecendo informações importantes para a realização de previsões em áreas como economia, finanças, meteorologia e monitoramento de sistemas.
+
+Entre as principais características de uma série temporal destacam-se a tendência e a sazonalidade. A tendência representa o comportamento de crescimento ou redução da série ao longo do tempo, enquanto a sazonalidade corresponde aos padrões que se repetem em intervalos regulares, como meses ou estações do ano. A identificação desses componentes é fundamental para compreender a dinâmica da série e selecionar métodos adequados para sua análise.
+
+A análise de séries temporais possui grande relevância prática, pois permite compreender o comportamento histórico das variáveis, identificar padrões recorrentes e auxiliar na realização de previsões futuras. Além disso, técnicas gráficas e métodos estatísticos possibilitam decompor as séries em diferentes componentes, facilitando a interpretação dos dados e a compreensão de sua estrutura temporal.
+
+Nesta atividade foram analisadas duas séries temporais com características distintas: a série **Shampoo Sales**, utilizada para ilustrar a presença de tendência, e a série **Natural Gas Consumption**, utilizada para evidenciar o comportamento sazonal. Para isso, foram utilizadas ferramentas da linguagem **R**, incluindo gráficos exploratórios, transformação dos dados em séries temporais, análise sazonal e decomposição aditiva e multiplicativa.
+
+## Objetivos Específicos
+
+Os objetivos específicos desta atividade são:
+
+-   Construir gráficos de séries temporais;
+
+-   Identificar a presença de tendência na série **Shampoo Sales**;
+
+-   Identificar a presença de sazonalidade na série **Natural Gas Consumption**;
+
+-   Transformar os dados para o formato de séries temporais utilizando a linguagem **R**;
+
+-   Aplicar a decomposição aditiva e multiplicativa na série sazonal;
+
+-   Interpretar os principais componentes das séries temporais por meio de análises gráficas.
+
+# Metodologia
+
+Para o desenvolvimento desta atividade foram utilizados conjuntos de dados em formato CSV contendo observações registradas ao longo do tempo. As análises foram realizadas na linguagem **R**, utilizando os pacotes **ggplot2**, **fpp3** e **dplyr**, que oferecem ferramentas para visualização, manipulação e análise de séries temporais.
+
+Inicialmente, os dados foram importados e organizados para análise. Em seguida, foram construídos gráficos exploratórios com o objetivo de identificar os principais padrões das séries temporais. Para a série sazonal, os dados foram convertidos para os formatos **ts** e **tsibble**, permitindo o reconhecimento da estrutura temporal da série e a aplicação de métodos específicos, como gráficos sazonais, gráficos de subséries e decomposição clássica em seus componentes de tendência, sazonalidade e erro.
+
+Os conjuntos de dados utilizados foram:
+
+-   **Shampoo Sales:** conjunto de dados contendo o número mensal de vendas de shampoo ao longo de três anos, totalizando 36 observações, utilizado para ilustrar uma série com tendência.
+
+-   **Natural Gas Consumption:** conjunto de dados contendo o consumo mensal de gás natural, medido em bilhões de pés cúbicos, no período de janeiro de 2000 a março de 2026, totalizando 315 observações. A série é disponibilizada pelo **Federal Reserve Economic Data (FRED)** e não possui ajuste sazonal (*Not Seasonally Adjusted*), sendo utilizada para ilustrar uma série com forte componente sazonal.
+
+# Resultados e Discussões
+
+## Série com Tendência — *Shampoo Sales*
+
+Uma série temporal com tendência caracteriza-se pela presença de um comportamento persistente de crescimento ou redução ao longo do tempo. Esse componente representa a direção geral da série, indicando se a variável apresenta aumento, diminuição ou estabilidade durante o período analisado.
+
+Para ilustrar esse comportamento, foi utilizado o conjunto de dados **Shampoo Sales**, composto pelas vendas mensais de shampoo ao longo de três anos.
+
+**Figura 1. Série temporal das vendas mensais de shampoo.**
+
+![](images/1-02.png){width="625"}
+
+Observa-se que as vendas de shampoo apresentam crescimento gradual ao longo do período analisado. Embora existam pequenas oscilações entre alguns meses, o comportamento geral da série é crescente, caracterizando a presença de uma tendência positiva.
+
+Além disso, nota-se que os valores observados nos períodos finais são, em geral, superiores aos registrados no início da série, reforçando a existência de um componente de tendência. Esse padrão evidencia que as vendas aumentam de forma consistente ao longo do tempo, comportamento típico de séries temporais com tendência.
+
+### Aplicação do Operador Diferença
+
+#### Série Diferenciada
+
+O operador diferença é uma técnica utilizada para calcular a variação entre observações consecutivas de uma série temporal, sendo especialmente útil para reduzir ou eliminar o componente de tendência. Essa transformação é obtida pela expressão:
+
+$$
+Y_t - Y_{t-1}
+$$
+
+em que:
+
+-   \\(Y_t\\) representa o valor da série no instante (t);
+-   \\(Y\_{t-1}\\) representa o valor observado no período imediatamente anterior.
+
+Após a aplicação do operador diferença, obtém-se uma nova série composta pelas variações entre períodos consecutivos.
+
+**Figura 2. Série diferenciada das vendas mensais de shampoo.**
+
+![](images/2-01.png){width="625"}
+
+Observa-se que, após a diferenciação, a tendência presente na série original é significativamente reduzida, fazendo com que os dados oscilem em torno de um nível mais constante. Isso ocorre porque, em vez de analisar os valores acumulados da série, passa-se a analisar apenas as variações ocorridas entre períodos consecutivos.
+
+Esse procedimento é amplamente utilizado na análise de séries temporais, pois contribui para tornar a série mais próxima da estacionariedade, condição importante para a aplicação de diversos métodos estatísticos e modelos de previsão.
+
+## Série Sazonal — *Natural Gas Consumption*
+
+Uma série sazonal caracteriza-se pela presença de padrões que se repetem de forma regular em intervalos conhecidos, como meses, trimestres ou estações do ano. Esse comportamento está associado a fatores periódicos que influenciam a variável observada.
+
+Para ilustrar esse componente, foi utilizada a série **Natural Gas Consumption**, disponibilizada pelo **Federal Reserve Economic Data (FRED)**. A série apresenta o consumo mensal de gás natural, medido em bilhões de pés cúbicos, no período de janeiro de 2000 a março de 2026, sem ajuste sazonal (*Not Seasonally Adjusted*).
+
+**Figura 3. Série temporal do consumo mensal de gás natural.**
+
+![](images/3-01.png){width="625"}
+
+Observa-se que a série apresenta um padrão sazonal bastante evidente, caracterizado pela repetição de picos e reduções ao longo dos anos. Os maiores níveis de consumo ocorrem de forma recorrente em determinados períodos, enquanto os menores valores também se repetem sistematicamente, evidenciando um comportamento sazonal bem definido.
+
+Além da sazonalidade, nota-se um aumento gradual no nível de consumo ao longo do período analisado, indicando a presença de uma tendência de crescimento. Observa-se ainda que a amplitude das oscilações aumenta à medida que o nível da série se eleva, sugerindo que as variações sazonais tornam-se mais intensas nos períodos de maior consumo.
+
+Esse comportamento indica que o consumo mensal de gás natural é influenciado por fatores sazonais recorrentes, associados principalmente às variações climáticas entre as estações do ano, ao mesmo tempo em que apresenta crescimento gradual ao longo do período analisado.
+
+## Gráfico da Série Temporal no Formato ts
+
+A transformação da série para o formato `ts` permite que a estrutura temporal dos dados seja reconhecida pela linguagem **R**, possibilitando a aplicação de métodos específicos para análise de séries temporais.
+
+**Figura 4. Série temporal do consumo mensal de gás natural no formato `ts`.**
+
+![](images/4-01.png){width="625"}
+
+Observa-se que a série apresenta um comportamento sazonal bem definido, caracterizado pela repetição de picos e reduções em intervalos anuais ao longo de todo o período analisado. Esse padrão evidencia que o consumo de gás natural é fortemente influenciado por fatores que se repetem regularmente ao longo dos anos.
+
+Além disso, verifica-se um aumento gradual no nível da série entre 2000 e 2026, indicando a presença de uma tendência de crescimento. Observa-se também que a amplitude das oscilações sazonais aumenta ao longo do tempo, com picos mais elevados nos anos mais recentes, sugerindo maior variabilidade do consumo em comparação aos primeiros anos da série.
+
+A representação no formato `ts` facilita a visualização desses componentes temporais, constituindo uma etapa importante para a aplicação de técnicas de análise sazonal e decomposição da série.
+
+## Gráfico de Sazonalidade
+
+O gráfico sazonal permite comparar o comportamento do consumo de gás natural para cada mês ao longo dos diferentes anos da série, facilitando a identificação de padrões que se repetem periodicamente.
+
+**Figura 5. Gráfico de sazonalidade do consumo mensal de gás natural.**
+
+![](images/5-01.png){width="625"}
+
+Observa-se um padrão sazonal bastante consistente entre os anos, evidenciado pela repetição do comportamento das curvas ao longo dos meses. De forma geral, o consumo é mais elevado nos meses de **dezembro, janeiro e fevereiro**, reduzindo-se gradualmente até atingir os menores níveis entre **maio e setembro**. A partir de **outubro**, verifica-se uma retomada do crescimento, culminando novamente em elevados níveis de consumo no final do ano.
+
+Além da repetição do padrão sazonal, observa-se que as curvas correspondentes aos anos mais recentes encontram-se, em geral, acima das curvas dos primeiros anos da série, indicando um aumento gradual do nível de consumo ao longo do período analisado.
+
+Portanto, o gráfico confirma a presença de uma sazonalidade bem definida, caracterizada pela repetição anual dos períodos de maior e menor consumo, evidenciando a forte influência das variações climáticas sobre a demanda por gás natural.
+
+## Subséries Sazonais
+
+O gráfico de subséries sazonais apresenta separadamente o comportamento do consumo de gás natural em cada mês ao longo dos anos, permitindo analisar simultaneamente a sazonalidade e a evolução temporal da série.
+
+**Figura 6. Subséries sazonais do consumo mensal de gás natural.**
+
+![](images/6-01.png){width="625"}
+
+Observa-se que o consumo de gás natural apresenta comportamento distinto entre os meses do ano. Os maiores níveis médios de consumo concentram-se nos meses de **dezembro**, **janeiro** e **fevereiro**, enquanto os menores valores são observados, em geral, entre **maio** e **setembro**.
+
+Além disso, verifica-se que, em praticamente todos os meses, o consumo apresenta uma trajetória crescente ao longo dos anos, evidenciada pela inclinação ascendente das curvas em cada painel. Esse comportamento indica que, além da sazonalidade recorrente, a série também apresenta uma tendência de crescimento durante o período analisado.
+
+As linhas horizontais em azul representam a média do consumo de cada mês ao longo dos anos. Observa-se que essas médias são mais elevadas nos meses de maior demanda e menores nos meses de menor consumo, reforçando a existência de um padrão sazonal bem definido.
+
+Portanto, o gráfico confirma simultaneamente a presença de uma sazonalidade anual consistente e de uma tendência de crescimento do consumo de gás natural, corroborando os resultados observados nos gráficos anteriores.
+
+## Decomposição Aditiva
+
+Na decomposição aditiva, considera-se que a série temporal pode ser representada pela seguinte expressão:\
+\
+\$\$\
+Y_t = T_t + S_t + E_t\
+\$\$\
+\
+em que:\
+\
+- \\(Y_t\\) representa o valor observado da série temporal no instante \\(t\\);\
+- \\(T_t\\) representa a componente de tendência;\
+- \\(S_t\\) representa a componente sazonal;\
+- \\(E_t\\) representa a componente aleatória (ou erro), correspondente às variações não explicadas pela tendência e pela sazonalidade.\
+\
+Nessa abordagem, assume-se que a amplitude das oscilações sazonais permanece aproximadamente constante ao longo do tempo, permitindo analisar separadamente os componentes de tendência, sazonalidade e irregularidade.
+
+**Figura 7. Decomposição aditiva do consumo mensal de gás natural.**
+
+![](images/7-01.png){width="625"}
+
+O primeiro painel apresenta a série original, evidenciando um comportamento sazonal bastante pronunciado, com picos e reduções que se repetem ao longo dos anos. Observa-se também um aumento gradual do nível da série, indicando a presença de uma tendência de crescimento.
+
+O segundo painel representa a componente de tendência. Verifica-se uma redução discreta nos primeiros anos da série, seguida por um crescimento contínuo a partir de aproximadamente 2008, indicando aumento gradual do consumo médio de gás natural ao longo do período analisado.
+
+O terceiro painel apresenta a componente sazonal. Observa-se um padrão periódico bastante estável, com oscilações que se repetem de forma semelhante em todos os anos, confirmando a forte influência da sazonalidade sobre o consumo de gás natural.
+
+O quarto painel corresponde à componente aleatória (resíduos), que representa as variações não explicadas pela tendência nem pela sazonalidade. Os resíduos permanecem distribuídos em torno de zero, sem apresentar um padrão sistemático evidente, embora existam algumas oscilações de maior magnitude em determinados períodos.
+
+De forma geral, a decomposição aditiva evidencia que a série é composta por uma tendência crescente, um componente sazonal bem definido e um componente aleatório de menor intensidade, permitindo compreender de forma mais detalhada a estrutura temporal do consumo mensal de gás natural.
+
+## Decomposição Multiplicativa
+
+Na decomposição multiplicativa, considera-se que a série temporal pode ser representada pela seguinte expressão:\
+\
+\$\$\
+Y_t = T_t \\times S_t \\times E_t\
+\$\$\
+\
+em que:\
+\
+- \\(Y_t\\) representa o valor observado da série no instante \\(t\\);\
+- \\(T_t\\) representa a componente de tendência;\
+- \\(S_t\\) representa a componente sazonal;\
+- \\(E_t\\) representa a componente aleatória (erro).\
+\
+Nesse modelo, assume-se que a intensidade da sazonalidade varia proporcionalmente ao nível da série. Assim, à medida que a série cresce, a amplitude das oscilações sazonais também tende a aumentar, tornando a decomposição multiplicativa mais adequada para representar esse comportamento.
+
+**Figura 8. Decomposição multiplicativa do consumo mensal de gás natural.**
+
+![](images/8-01.png){width="625"}
+
+O primeiro painel apresenta a série original, evidenciando um comportamento sazonal bastante pronunciado, com oscilações recorrentes ao longo dos anos e um aumento gradual do nível de consumo. Observa-se ainda que a amplitude das oscilações cresce à medida que a série evolui, característica compatível com uma estrutura multiplicativa.
+
+O segundo painel representa a componente de tendência. Verifica-se um crescimento gradual do consumo médio de gás natural ao longo do período analisado, especialmente a partir de aproximadamente 2008, indicando uma trajetória ascendente da série.
+
+O terceiro painel apresenta a componente sazonal em termos relativos. Diferentemente da decomposição aditiva, os valores oscilam em torno de **1**, representando fatores multiplicativos. Valores superiores a 1 indicam períodos em que o consumo se encontra acima da tendência, enquanto valores inferiores a 1 representam períodos de consumo abaixo da tendência. Observa-se que esse padrão sazonal permanece bastante estável ao longo dos anos.
+
+O quarto painel corresponde à componente aleatória (resíduos). Os valores também permanecem próximos de **1**, indicando que a maior parte das variações não explicadas pela tendência e pela sazonalidade possui pequena magnitude. Embora existam algumas oscilações pontuais, não se observa um padrão sistemático nos resíduos.
+
+De forma geral, a decomposição multiplicativa evidencia que a série apresenta uma tendência crescente, forte sazonalidade e variações sazonais proporcionais ao nível da série. Como a amplitude das oscilações aumenta à medida que o consumo cresce, o modelo multiplicativo representa de forma mais adequada a estrutura temporal dos dados do que a decomposição aditiva.
+
+# Conclusão
+
+A análise das séries temporais permitiu identificar e interpretar os principais componentes presentes em diferentes conjuntos de dados, evidenciando a importância das técnicas de análise temporal para compreender o comportamento das variáveis ao longo do tempo.
+
+Na série **Shampoo Sales**, observou-se uma tendência crescente nas vendas ao longo do período analisado. A aplicação do operador diferença reduziu esse comportamento, tornando a série mais estável e evidenciando sua utilidade como etapa de pré-processamento em análises de séries temporais.
+
+Na série **Natural Gas Consumption**, verificou-se a presença de uma forte sazonalidade, caracterizada pela repetição de padrões anuais de consumo, além de uma tendência gradual de crescimento. Os gráficos sazonais, as subséries e as decomposições aditiva e multiplicativa permitiram identificar claramente esses componentes, sendo a decomposição multiplicativa a que melhor representou a estrutura da série, devido ao aumento da amplitude das oscilações ao longo do tempo.
+
+Dessa forma, conclui-se que as técnicas empregadas mostraram-se eficazes para identificar e interpretar os componentes de tendência e sazonalidade, proporcionando uma compreensão mais detalhada do comportamento das séries temporais. Esses resultados demonstram a importância da análise de séries temporais como ferramenta de apoio à compreensão de fenômenos que evoluem ao longo do tempo e à tomada de decisões baseada em dados.
